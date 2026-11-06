@@ -35,7 +35,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Corrected by: none; `planning/0*.md` stay frozen and README.md is the task list, so neither is edited here
 - Commit: none
 
-## 01:40 Task 2's review: one Medium (F1), fixed; three Lows
+## 01:41 Task 2's review: one Medium (F1), fixed; three Lows
 - Agent did: wrote the golden tests; the reviewer found the H3 copy run did not check the counts, so a checker
   that never resolved `--root` (a root behind /tmp's symlink) passed every test
 - Helped / failed: the review helped; the test gap was the agent's
@@ -48,7 +48,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Corrected by: the guard; the test now builds those values from pieces at run time, so no committed file holds one
 - Commit: none
 
-## 01:44 Task 4's review: an unclosed quote came out green; fixed
+## 01:45 Task 4's review: an unclosed quote came out green; fixed
 - Agent did: wrote the quote parse so a quote with no closing mark was dropped, leaving "line only" (exit 0)
 - Helped / failed: the review helped; the agent's parse failed open. The recheck of cb5bca6 also corrected the
   task 2 review: plain removal of `realpath(root)` was already caught, only an `abspath` form slipped through
@@ -56,7 +56,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   open may close straight. Chosen over an eighth verdict to keep 01's closed list of seven
 - Commit: a95a1be
 
-## 01:49 The scrub: built to 02's five passes, with three choices nobody could check
+## 01:46 The scrub: built to 02's five passes, with three choices nobody could check
 - Agent did: wrote `scrub.py` (tests first, on a made-up log holding one of each of the six start-up blocks) and
   `planning/finish-sitting.sh`, dry-run once on a made-up export and list
 - Helped / failed: open; not verified against a real `/export`, whose format this session has not seen. Choices:
@@ -66,6 +66,13 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   breaks removed and with them as spaces, so "Acme\nWidgets" also matches. 200 lines, not 02's "about 40"
 - Corrected by: none yet; Danish's read of the pass-1 counts in the real report closes (1)
 - Commit: see the scrub commit after this entry
+
+## 01:46 Three entry times were guessed, not read from the clock
+- Agent did: wrote the 01:41 (task 2 review), 01:45 (task 4 review) and 01:46 (scrub) entries with guessed times
+  (01:40, 01:44, 01:49)
+- Helped / failed: failed; 03 section 6 says times come from `date +%H:%M`, and 01:49 was later than the clock
+- Corrected by: the agent, on the next `date`: each set to the clock reading taken just before or after it was written
+- Commit: none (corrected before this file's next commit)
 
 ## Lows
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened
