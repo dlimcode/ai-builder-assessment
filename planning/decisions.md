@@ -309,6 +309,16 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Corrected by: Danish's word: scrub.py is not changed again
 - Commit: 75476d2; the log in 5829fbc
 
+## 03:34 Four new reds in the dog-food run after the merge
+- Agent did: wrote `yes` as a new line under `question:` in `planning/build-brief.md`, which moved every later line
+  of the brief down by one
+- Helped / failed: the checker helped; `python3 check_citations.py planning/*.md --root .` on main went from 19 to
+  23 red. The four new ones all cite the brief and are "wrong line, found at" the next line: 04-devils-advocate.md
+  lines 15, 17 and 77, and planning/README.md line 8. The citations were right when written; the file moved on,
+  which is the weakest part the README names. The other 19 are the 01:39 entry's
+- Corrected by: none; left as they are, since those files are the planning record
+- Commit: the commit after this entry
+
 ## Lows
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened
   (patch `open`), a permission-denied file as "file missing"
