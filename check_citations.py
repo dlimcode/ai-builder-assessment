@@ -3,11 +3,14 @@
 Usage: python3 check_citations.py REPORT.md [REPORT.md ...] [--root DIR]
 Python 3.9 standard library only; no model call, no network.
 """
+import os
 import re
 from collections import namedtuple
 
 # line: line number in the report; start/end: cited lines (None when the number is too long to be real)
 Ref = namedtuple("Ref", "line path start end quote raw")
+# found: up to three "path:line" places where the words are, for red verdicts
+Result = namedtuple("Result", "verdict found")
 
 PATH_CHARS = r"[A-Za-z0-9_./-]"
 REF_RE = r"(?<!%s)(?P<path>%s+):(?P<a>\d+)(?:-(?P<b>\d+))?" % (PATH_CHARS, PATH_CHARS)
@@ -80,3 +83,53 @@ def find_refs(text):
         refs += found
         skipped += n
     return refs, skipped
+
+
+def clean(text):
+    """Strip backticks and ** marks, collapse whitespace runs to one space; case is kept."""
+    return " ".join(text.replace("`", "").replace("**", "").split())
+
+
+def read_lines(root, path):
+    """Return the file's lines, or a verdict string when it must not or cannot be read."""
+    root = os.path.realpath(root)
+    target = os.path.realpath(os.path.join(root, path))
+    if os.path.commonpath([root, target]) != root:
+        return "refused: outside root"  # decided on the resolved path, before any open
+    if not os.path.isfile(target):
+        return "file missing"
+    try:
+        with open(target, encoding="utf-8") as f:
+            lines = f.read().split("\n")
+    except (OSError, UnicodeDecodeError):
+        return "file missing"
+    if lines[-1] == "":
+        lines.pop()
+    return lines
+
+
+def starts_at(lines, i, words):
+    """The words are on line i (1-based), or start there and run into the next line."""
+    here = clean(lines[i - 1])
+    joined = here + " " + clean(lines[i]) if i < len(lines) else here
+    return 0 <= joined.find(words) < len(here)
+
+
+def check(ref, root):
+    lines = read_lines(root, ref.path)
+    if isinstance(lines, str):
+        return Result(lines, [])
+    words = clean(ref.quote or "")
+    places = ["%s:%d" % (ref.path, i) for i in range(1, len(lines) + 1) if words and starts_at(lines, i, words)][:3]
+    a, b = ref.start, ref.end
+    if a is None or b is None or a < 1 or a > b or b > len(lines):
+        return Result("no such line", places)
+    if not words:
+        return Result("line only", [])
+    if a == b:
+        held = starts_at(lines, a, words)
+    else:
+        held = words in " ".join(clean(l) for l in lines[a - 1:b])
+    if held:
+        return Result("holds", [])
+    return Result("wrong line" if places else "not in file", places)
