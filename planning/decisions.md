@@ -300,6 +300,15 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Corrected by: Danish's instruction
 - Commit: none
 
+## 03:30 The log is in; finish-sitting's remaining hits accepted by Danish
+- Agent did: nothing in scrub.py; Danish ran `planning/finish-sitting.sh` with his private list
+- Helped / failed: n/a. He wrote `logs/session.txt` from the scrubbed export and read it in full. Its 9 remaining
+  list hits are the harness temp folder name; the repo check's hits are made-up test paths, the scrub's own email
+  pattern and the temp folder. He accepted all of them, so finish-sitting.sh still exits 1 on them (README,
+  weakest part). A grep of the log: no home path, no email, no username, no key (`ghp_` only as a named prefix)
+- Corrected by: Danish's word: scrub.py is not changed again
+- Commit: the commit after this entry
+
 ## Lows
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened
   (patch `open`), a permission-denied file as "file missing"

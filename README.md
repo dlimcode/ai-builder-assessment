@@ -80,6 +80,10 @@ It cannot tell a file that changed after the report was written from a citation 
 come out "wrong line". Next: `--at <commit>`, reading each cited file as it was at that commit (`git show`), so a red
 means the agent was wrong, not that the file moved on.
 
+`planning/finish-sitting.sh` still exits 1 on this repo: its private-list hits in the log (the harness temp folder
+name) and in the files and history (made-up test paths, the scrub's own email pattern, the temp folder) were read
+and accepted by hand, not by the script. A run that exits 1 still needs a person to read both reports.
+
 Smaller known gaps are listed under `## Lows` in `planning/decisions.md` (for example, words spread over three or
 more lines and cited at the wrong place come out "not in file").
 
