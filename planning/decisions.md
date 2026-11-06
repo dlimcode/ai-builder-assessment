@@ -237,6 +237,25 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   earlier `refs/original/...` backup, until he says to delete them
 - Commit: 224cf86 (amended)
 
+## 02:59 Fix session: finish-sitting still failed the export on the build's own text
+- Agent did: the generic set (02:15) only allowed whole list entries that are generic, so a private entry still
+  failed the export where it hit the build's own text: made-up test paths, a bare `~/Documents` (an entry written
+  as a home path reads `~/...` after pass 2), the scrub's email pattern and the harness temp folder
+- Helped / failed: failed; Danish's run of `planning/finish-sitting.sh` found it. Now `GENERIC_TEXT` in scrub.py
+  lists those phrases exactly (any case, splittable by wrapping); a hit wholly inside one is reported as generic,
+  not failed, and the text around it is still checked. `~/Documents/<folder>` still fails: the first version let
+  it pass, and the new test caught that, as it caught a lowercase `/users/alex` path the first version missed. Run
+  on the real export with a stand-in list (not Danish's), the export is written and 0 hits remain; his list is not
+  tried. The repo check is unchanged: every phrase was already in tracked files, which it passed
+- Corrected by: Danish
+- Commit: the commit after this entry
+
+## 02:59 This fix session's log is not exported
+- Agent did: nothing; the two fixes above were made in a short session after the sitting's export
+- Helped / failed: n/a; `logs/session.txt` is the sitting's log only. This session is not exported or committed
+- Corrected by: Danish's instruction
+- Commit: none
+
 ## Lows
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened
   (patch `open`), a permission-denied file as "file missing"

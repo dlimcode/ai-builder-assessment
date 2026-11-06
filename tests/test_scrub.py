@@ -284,6 +284,27 @@ class CommandTests(unittest.TestCase):
         log = self.path("log.txt", "a path /Users/alex/x\n")
         self.assertEqual(run(log, self.out, listed, self.report).returncode, 0)
 
+    def test_generic_text_in_the_export_is_reported_not_failed(self):
+        # Entries that hit only inside the build's own text: a made-up test path, a bare ~/Documents (entry written
+        # as the home path), the scrub's email pattern and the harness temp folder, the last split by wrapping.
+        home = os.path.expanduser("~")
+        listed = self.path("g.txt", "/Users/someone\n%s/Documents\n@example.com\nclaude-501\nAcme Widgets\n" % home)
+        log = self.path("log.txt", "test path /Users/someone/x, /USERS/someone/y and -Users-alex\n"
+                        "read ~/Documents, then ~/Documents/\nthe pattern \"@example.com\" and [A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\n"
+                        "temp <tmp>/cl\naude-501/x\n")
+        res = run(log, self.out, listed, self.report)
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertTrue(os.path.exists(self.out))
+        with open(self.report, encoding="utf-8") as f:
+            text = f.read()
+        for n in (1, 2, 3, 4):
+            self.assertIn("list line %d" % n, text.split("list hits:")[0])
+        self.assertEqual(self.last_line(), "private list: 0 hits")
+        # Anything past a generic phrase is still checked: a folder under ~/Documents, a listed word after one.
+        for text in ["see ~/Documents/Zephyr\n", "~/Documents Acme Widgets\n", "-Users-alex/Acme Widgets\n"]:
+            with self.subTest(text=text):
+                self.assertEqual(run(self.path("d.txt", text), self.out, listed, self.report).returncode, 1)
+
     def test_a_hit_can_be_found_beside_the_report(self):
         log = self.path("log.txt", "<system-reminder>\ncut\n</system-reminder>\nline two\nnow Acme Widgets\n")
         self.assertEqual(run(log, self.out, self.list, self.report).returncode, 1)

@@ -271,6 +271,25 @@ GENERIC = {"/users", "/private", "/private/tmp", "/private/var/folders", "/var/f
            "documents", "developer", "~/documents", "~/developer", ".claude", "~/.claude"}
 
 
+def spaced(literal):
+    """A pattern for the literal that also matches it split by whitespace (terminal wrapping)."""
+    return r"\s*".join(re.escape(c) for c in literal)
+
+
+# Text the build itself puts in the export: made-up test paths, a bare ~/Documents (nothing after it), the scrub's
+# own email pattern and the harness temp folder. A list hit wholly inside one is reported, not failed; the text
+# around it, and any folder under ~/Documents, is still checked.
+GENERIC_TEXT = re.compile("|".join([spaced(s) for s in (
+    "/Users/alex", "-Users-alex", "/Users/someone", "~/Documents/Old Shoebox", "@example.com",
+    r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", "claude-501")] + [spaced("~/Documents") + r"/?(?![/\w.-])"]),
+    re.IGNORECASE)  # the list matches any case, so its generic text must too
+
+
+def mask_generic(text):
+    """The text with each GENERIC_TEXT match blanked, its line breaks kept so line numbers do not move."""
+    return GENERIC_TEXT.sub(lambda m: "<generic>" + "\n" * m.group(0).count("\n"), text)
+
+
 def split_generic(entries):
     """(private entries, generic entries), each keeping every entry's number; the other side holds a blank."""
     generic = [e if e.lower().rstrip("/") in GENERIC else "" for e in entries]
@@ -287,7 +306,7 @@ def write_report(path, body, hits, users, generic):
     tail = "private list: 0 hits" if not hits else "private list: %d hits (listed above)" % len(hits)
     with open(path, "w", encoding="utf-8") as f:
         f.write("\n".join(body + ["", "username hits (yours to decide):"] + (users or ["none"])
-                          + ["", "generic pattern hits (allowed, not failed; the set is GENERIC in scrub.py):"]
+                          + ["", "generic pattern hits (allowed, not failed; the sets are GENERIC and GENERIC_TEXT in scrub.py):"]
                           + (generic or ["none"]) + ["", "list hits:"] + (hits or ["none"]) + ["", tail]) + "\n")
     if generic:
         print("generic pattern hits: %d (allowed; read them in %s)" % (len(generic), path))
@@ -316,8 +335,11 @@ def main(argv):
     paths = machine_paths(repo, os.path.expanduser("~"), temps)
     private, generic = split_generic(read_list(private_list))
     text, changes = scrub(read(export), paths)
-    hits, users = hit_lines("scrubbed", *list_hits(text, with_path_forms(private, paths), user))
+    forms = with_path_forms(private, paths)
+    all_hits, users = hit_lines("scrubbed", *list_hits(text, forms, user))
+    hits = hit_lines("scrubbed", list_hits(mask_generic(text), forms, user)[0], [])[0]
     generic_hits = hit_lines("scrubbed", list_hits(text, generic, user)[0], [])[0]
+    generic_hits += [h for h in all_hits if h not in hits]
     counts = {}
     for _, kind, _ in changes:
         counts[kind] = counts.get(kind, 0) + 1
