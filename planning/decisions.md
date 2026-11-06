@@ -175,6 +175,13 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   check covers every commit from HEAD, main's too, without author lines (also answers recheck F3a). F7 is next
 - Commit: the fix commit after this entry
 
+## 02:18 Scrub: a hit's line number now points at a file that exists
+- Agent did: on a hit, the report named lines of a scrubbed log that was never written (unit-review-scrub F7)
+- Helped / failed: the review helped; the no-space half of F7 was already fixed in cc51f43
+- Corrected by: on a hit, the scrubbed text is written beside the report (`<report>.scrubbed.txt`, in the temp
+  folder outside the repo) and both messages say where; one test
+- Commit: the fix commit after this entry
+
 ## Lows
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened
   (patch `open`), a permission-denied file as "file missing"

@@ -314,7 +314,10 @@ def main(argv):
     if hits:
         if os.path.exists(out):
             os.remove(out)  # an earlier clean run's log may hold a word listed since
-        print("private-list hits in the export: %s not written; see %s" % (out, report), file=sys.stderr)
+        with open(report + ".scrubbed.txt", "w", encoding="utf-8") as f:
+            f.write(text)  # beside the report, outside the repo: the report's line numbers point here
+        print("private-list hits in the export: %s not written; the lines are in %s.scrubbed.txt"
+              % (out, report), file=sys.stderr)
         return 1
     with open(out, "w", encoding="utf-8") as f:
         f.write(text)

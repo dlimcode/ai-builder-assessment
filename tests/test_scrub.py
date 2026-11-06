@@ -264,6 +264,14 @@ class CommandTests(unittest.TestCase):
         log = self.path("log.txt", "a path /Users/alex/x\n")
         self.assertEqual(run(log, self.out, listed, self.report).returncode, 0)
 
+    def test_a_hit_can_be_found_beside_the_report(self):
+        log = self.path("log.txt", "<system-reminder>\ncut\n</system-reminder>\nline two\nnow Acme Widgets\n")
+        self.assertEqual(run(log, self.out, self.list, self.report).returncode, 1)
+        with open(self.report, encoding="utf-8") as f:
+            line = int(f.read().split("scrubbed line ")[1].split(":")[0])
+        with open(self.report + ".scrubbed.txt", encoding="utf-8") as f:
+            self.assertIn("Acme Widgets", f.read().split("\n")[line - 1])
+
     def test_check_only_over_many_files(self):
         a = self.path("a.txt", "clean\n")
         b = self.path("b.txt", "acme widgets here\n")

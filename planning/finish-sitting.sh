@@ -33,8 +33,8 @@ echo "scrub report:  $tmp/scrub-report.txt"
 echo "check report:  $tmp/check-report.txt"
 echo "last lines:    $(tail -1 "$tmp/scrub-report.txt") | $(tail -1 "$tmp/check-report.txt")"
 if [ "$export_hit" -eq 1 ]; then
-  echo "hits in the export: logs/session.txt is not written. Take the word out of the export, or say in README.md"
-  echo "why the log is not committed."
+  echo "hits in the export: logs/session.txt is not written. The report's line numbers point at"
+  echo "$tmp/scrub-report.txt.scrubbed.txt. Take the word out of the export, or say in README.md why there is no log."
 fi
 if [ "$repo_hit" -eq 1 ]; then
   echo "hits in tracked files or branch history (branch-history.txt): a new commit fixes the files, not history;"
