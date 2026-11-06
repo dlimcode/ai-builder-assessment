@@ -182,6 +182,23 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   folder outside the repo) and both messages say where; one test
 - Commit: the fix commit after this entry
 
+## 02:28 The unit-end re-review: one regression and one silent fallback in the scrub fixes
+- Agent did: in cc51f43 let only a line-start tag open a reminder block, which kept a reminder opening after a
+  closed one or after a `> ` mark; in 72bf29b dropped the whole records reading on one bad line
+- Helped / failed: the re-review helped (2 Medium, 5 Low, 2 questions: planning/reviews/unit-rereview-fixes.md);
+  it also confirmed all six fixes answer their findings and all 19 dog-food reds are explained
+- Corrected by: closed reminder spans and a `>` before a tag no longer stop it opening a block; a session file is read
+  as records when at least half its lines are records, other lines kept as text after their own mark, and the report
+  says which path it took. One recheck follows; any finding after that goes to Danish
+- Commit: the fix commit after this entry
+
+## 02:28 The shell's grep is a wrapper that dropped results for a pattern with a space
+- Agent did: counted the old folder name with `grep -c`, which printed nothing instead of a number
+- Helped / failed: failed quietly; `type grep` shows a shell function from the session snapshot
+- Corrected by: the agent: every count of the name rerun with `command grep` and Python: working tree 0, HEAD tree 0,
+  commit messages 0, history 15 (the rewrite removes these; rehearsed on a clone: 15 to 0)
+- Commit: none
+
 ## Lows
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened
   (patch `open`), a permission-denied file as "file missing"
@@ -232,3 +249,13 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - unit-review-scrub F9, `scrub.py` EMAIL: quadratic on a long run with no `@` (100k hex characters: 13.6 s)
 - unit-review-scrub F10, `scrub.py` main: path forms of list entries are tested only directly, not through the command
 - unit-review-scrub questions: box-drawing characters between wrapped words; staged content not checked
+- unit-rereview-fixes F1 (tail), `scrub.py` cut_reminders: a reminder opening after tool output on the same line
+  is still kept (it cannot be told from a tag quoted in code)
+- unit-rereview-fixes F3, `scrub.py` match: the spaced pass matches inside words ("Sam" in "same"); whole-word
+  matching for short entries is Danish's call
+- unit-rereview-fixes F4, `check_citations.py:65`: a curly open now runs to a later curly close on mixed-mark lines (red)
+- unit-rereview-fixes F5, `scrub.py` main: `<report>.scrubbed.txt` is written beside any report path, even inside the
+  repo, and the docstring's exit-1 line does not mention it
+- unit-rereview-fixes F6, `planning/finish-sitting.sh`: "without author lines" has no test
+- unit-rereview-fixes F7: the demo's reviews-run numbers are stale (task 12 re-measures)
+- unit-rereview-fixes Q1: whether a skill's header and body share one record in the saved session file is unseen

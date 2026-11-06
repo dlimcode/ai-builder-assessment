@@ -181,6 +181,26 @@ class ScrubTests(unittest.TestCase):
         out, _ = scrub.scrub("ls /Users/alex/Documents/Old Shoebox/Zephyr\n", PATHS)
         self.assertTrue(scrub.list_hits(out, scrub.with_path_forms(entries, PATHS), USER)[0])
 
+    def test_a_reminder_after_text_on_its_line_is_cut(self):
+        tag, end = "<system-" + "reminder>", "</system-" + "reminder>"
+        for text in [tag + "one" + end + tag + "secret-project second" + end + "\nkept\n",
+                     "> " + tag + "\nGit user: secret-project\n" + end + "\nkept\n"]:
+            with self.subTest(text=text):
+                out, _ = scrub.scrub(text, PATHS)
+                self.assertNotIn("secret-project", out)
+                self.assertIn("kept", out)
+
+    def test_a_bad_line_in_a_saved_session_file_keeps_the_records_reading(self):
+        records = [{"message": {"content": "Base directory for this skill: x\nsecret-project steps"}},
+                   {"message": {"content": "about Acme\nWidgets"}},
+                   {"message": {"content": "\u23fa a reply kept"}}]
+        text = "\n".join(json.dumps(r) for r in records) + '\n{"truncated": "half a rec\n'
+        out, changes = scrub.scrub(text, PATHS)
+        self.assertNotIn("secret-project", out)
+        self.assertIn("a reply kept", out)
+        self.assertTrue(scrub.list_hits(out, PATTERNS, USER)[0])
+        self.assertIn("input", [kind for _, kind, _ in changes])
+
     def test_list_match_ignores_case(self):
         hits, _ = scrub.list_hits("SECRET-PROJECT\n", PATTERNS, USER)
         self.assertTrue(hits)

@@ -18,7 +18,8 @@ import tempfile
 LEAD = r"^[\s\u23bf\u2502\u2514\u251c\u2500]*"  # an indent or the export's tree glyphs before a marker
 HEADING = re.compile(r"^#{1,2} ")
 REMINDER_TAG = re.compile(r"<(/)?system-reminder>")
-OPENS_LINE = re.compile(r"[\s\u23bf\u2502\u2514\u251c\u2500]*")
+CLOSED_REMINDER = re.compile(r"<system-reminder>.*?</system-reminder>")
+OPENS_LINE = re.compile(r"[\s>\u23bf\u2502\u2514\u251c\u2500]*")  # an indent, a prompt mark or tree glyphs
 # Pass 1: (kind, start marker, where the block ends). A block whose end is never found runs to the end of
 # the file: cutting too much is safe, the report shows it.
 BLOCKS = [
@@ -67,7 +68,8 @@ def cut_reminders(text):
     out, depth, start, pos = [], 0, 0, 0
     for m in REMINDER_TAG.finditer(text):
         if m.group(1) is None:
-            before = text[text.rfind("\n", 0, m.start()) + 1:m.start()].replace("</system-reminder>", "")
+            before = text[text.rfind("\n", 0, m.start()) + 1:m.start()]
+            before = CLOSED_REMINDER.sub("", before).replace("</system-reminder>", "")
             if depth == 0 and not OPENS_LINE.fullmatch(before):
                 continue  # a tag quoted mid-line, e.g. in code, is not a block
             if depth == 0:
@@ -148,15 +150,19 @@ def with_path_forms(entries, paths):
 
 def records_text(text):
     """A saved session file holds one JSON record per line, with line breaks escaped inside strings, so no marker
-    starts a line. Each record becomes its strings, one after another, after a reply mark that ends any block
-    cut from the record before. Any other text is returned as it is."""
+    starts a line. If at least half its lines are JSON records, each record becomes its strings, after a reply mark
+    that ends a loaded text cut from the record before; a line that is not a record (e.g. one cut short) is kept as
+    text after its own mark, with its escaped line breaks made real. Returns (text, a note on which path it took)."""
     lines = [l for l in text.split("\n") if l.strip()]
-    try:
-        records = [json.loads(l) for l in lines]
-    except ValueError:
-        return text
-    if not records or not all(isinstance(r, dict) for r in records):
-        return text
+    parsed = []
+    for l in lines:
+        try:
+            parsed.append(json.loads(l))
+        except ValueError:
+            parsed.append(None)
+    records = sum(isinstance(r, dict) for r in parsed)
+    if not records or records * 2 < len(lines):
+        return text, "input: text"
 
     def strings(v):
         if isinstance(v, str):
@@ -168,12 +174,20 @@ def records_text(text):
             for x in v:
                 yield from strings(x)
 
-    return "".join("\u23fa record %d\n%s\n" % (n, "\n".join(strings(r))) for n, r in enumerate(records, 1))
+    out = []
+    for n, (line, r) in enumerate(zip(lines, parsed), 1):
+        if isinstance(r, dict):
+            out.append("\u23fa record %d\n%s\n" % (n, "\n".join(strings(r))))
+        else:
+            out.append("\u23fa line %d, not a JSON record\n%s\n" % (n, line.replace("\\n", "\n")))
+    return "".join(out), "input: %d JSON records, %d other lines kept as text" % (records, len(lines) - records)
 
 
 def scrub(text, paths):
     """Passes 1-4. Returns (scrubbed text, [(line, kind, placeholder)])."""
-    text, changes = cut_blocks(records_text(text))
+    text, note = records_text(text)
+    text, changes = cut_blocks(text)
+    changes.append((0, "input", note))
     text = replace_paths(text, paths, changes)
     text = replace(EMAIL, text, "email", "<email>", changes)
     for kind, pattern in SECRETS:
