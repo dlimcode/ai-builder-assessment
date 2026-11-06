@@ -1,5 +1,7 @@
 # Review of ef0fdaa (task 7, the scrub step)
 
+(Edited on Danish's instruction, 7 Nov: a real folder name in one example was replaced by the invented "Old Shoebox".)
+
 (Saved as received. The agent tool neutralised the reminder tag in this reply, writing it as `<\system-reminder>`.)
 
 **Outcome:** the commit runs and covers every part of task 7's shape, but it lets private text through with exit 0 in at least seven ways I reproduced. Three of them are High: two start-up blocks written on one line, wrapped words on indented lines, and private words left in branch history.

@@ -1,5 +1,7 @@
 # Recheck of the task 7 scrub fixes (accb3c6, 60d5e4b)
 
+(Edited on Danish's instruction, 7 Nov: a real folder name in one example was replaced by the invented "Old Shoebox".)
+
 (Saved as received. The agent tool neutralised the reminder tag in this reply, writing it as `<\system-reminder>`.)
 
 **Result:** six of the seven findings are fixed, and F7 is only partly fixed. Every review probe now gives the right result except one F7 variant. The tests pass (`Ran 20 tests ... OK`), and each finding has a test that fails when its fix is taken out. I found three new problems where the fixes cut or match too much (Medium), one place where F7 still leaks (Medium), and four smaller gaps (Low or questions).

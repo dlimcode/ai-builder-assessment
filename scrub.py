@@ -217,29 +217,47 @@ def read_list(path):
     return entries
 
 
+# List entries that are generic path roots or folder names: scrub.py and its tests must name them, so their hits
+# are reported for Danish to read, never failed. An entry counts as generic only if it is exactly one of these
+# (any case, a trailing / ignored); "/Users/someone" or "Documents/Clients" is not.
+GENERIC = {"/users", "/private", "/private/tmp", "/private/var/folders", "/var/folders", "/tmp", "/home", "/volumes",
+           "documents", "developer", "~/documents", "~/developer", ".claude", "~/.claude"}
+
+
+def split_generic(entries):
+    """(private entries, generic entries), each keeping every entry's number; the other side holds a blank."""
+    generic = [e if e.lower().rstrip("/") in GENERIC else "" for e in entries]
+    return [e if not g else "" for e, g in zip(entries, generic)], generic
+
+
 def hit_lines(name, hits, user_hits):
     out = ["%s line %d: list line %d" % (name, line, n) for line, n in hits]
     users = ["%s line %d: ...%s..." % (name, line, context.replace("\n", " ")) for line, context in user_hits]
     return out, users
 
 
-def write_report(path, body, hits, users):
+def write_report(path, body, hits, users, generic):
     tail = "private list: 0 hits" if not hits else "private list: %d hits (listed above)" % len(hits)
     with open(path, "w", encoding="utf-8") as f:
         f.write("\n".join(body + ["", "username hits (yours to decide):"] + (users or ["none"])
-                          + ["", "list hits:"] + (hits or ["none"]) + ["", tail]) + "\n")
+                          + ["", "generic pattern hits (allowed, not failed; the set is GENERIC in scrub.py):"]
+                          + (generic or ["none"]) + ["", "list hits:"] + (hits or ["none"]) + ["", tail]) + "\n")
+    if generic:
+        print("generic pattern hits: %d (allowed; read them in %s)" % (len(generic), path))
 
 
 def main(argv):
     user = getpass.getuser()
     if argv[:1] == ["--check-only"] and len(argv) >= 4:
-        patterns = read_list(argv[1])
-        all_hits, all_users = [], []
+        private, generic = split_generic(read_list(argv[1]))
+        all_hits, all_users, all_generic = [], [], []
         for name in argv[3:]:
-            hits, users = hit_lines(name, *list_hits(read(name), patterns, user))
+            text = read(name)
+            hits, users = hit_lines(name, *list_hits(text, private, user))
             all_hits += hits
             all_users += users
-        write_report(argv[2], ["check-only: %d files" % len(argv[3:])], all_hits, all_users)
+            all_generic += hit_lines(name, list_hits(text, generic, user)[0], [])[0]
+        write_report(argv[2], ["check-only: %d files" % len(argv[3:])], all_hits, all_users, all_generic)
         return 1 if all_hits else 0
     if len(argv) != 4 or argv[0].startswith("-"):
         print(__doc__.strip(), file=sys.stderr)
@@ -249,16 +267,17 @@ def main(argv):
              "/private/var/folders", "/var/folders", "/private/tmp", "/tmp"]
     repo = os.path.dirname(os.path.abspath(__file__))
     paths = machine_paths(repo, os.path.expanduser("~"), temps)
-    entries = read_list(private_list)
+    private, generic = split_generic(read_list(private_list))
     text, changes = scrub(read(export), paths)
-    hits, users = hit_lines("scrubbed", *list_hits(text, with_path_forms(entries, paths), user))
+    hits, users = hit_lines("scrubbed", *list_hits(text, with_path_forms(private, paths), user))
+    generic_hits = hit_lines("scrubbed", list_hits(text, generic, user)[0], [])[0]
     counts = {}
     for _, kind, _ in changes:
         counts[kind] = counts.get(kind, 0) + 1
     body = ["counts: " + ", ".join("%s %d" % (k, counts.get(k, 0)) for k in ("block", "path", "email", "secret", "mac")),
             "", "changes (line in the scrubbed log, kind, placeholder):"]
     body += ["  line %d: %s -> %s" % c for c in changes] or ["  none"]
-    write_report(report, body, hits, users)
+    write_report(report, body, hits, users, generic_hits)
     if hits:
         if os.path.exists(out):
             os.remove(out)  # an earlier clean run's log may hold a word listed since

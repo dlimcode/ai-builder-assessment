@@ -221,6 +221,21 @@ class CommandTests(unittest.TestCase):
                 listed = self.path("l.txt", text)
                 self.assertEqual(run(log, self.out, listed, self.report).returncode, 1)
 
+    def test_generic_path_entries_are_reported_not_failed(self):
+        listed = self.path("g.txt", "/Users/\n/tmp\n~/Developer\nAcme Widgets\n")
+        clean = self.path("a.txt", "see /Users/alex/x, /tmp/y and ~/Developer/z\n")
+        res = run("--check-only", listed, self.report, clean)
+        self.assertEqual(res.returncode, 0, res.stderr)
+        with open(self.report, encoding="utf-8") as f:
+            text = f.read()
+        self.assertIn("generic pattern hits", text)
+        self.assertIn("a.txt line 1: list line 1", text)
+        self.assertEqual(self.last_line(), "private list: 0 hits")
+        dirty = self.path("b.txt", "see /tmp/y and Acme Widgets\n")
+        self.assertEqual(run("--check-only", listed, self.report, dirty).returncode, 1)
+        log = self.path("log.txt", "a path /Users/alex/x\n")
+        self.assertEqual(run(log, self.out, listed, self.report).returncode, 0)
+
     def test_check_only_over_many_files(self):
         a = self.path("a.txt", "clean\n")
         b = self.path("b.txt", "acme widgets here\n")
@@ -282,6 +297,17 @@ class FinishSittingTests(unittest.TestCase):
         self.git("commit", "-q", "-am", "remove the word")
         res = self.finish()
         self.assertNotEqual(res.returncode, 0, res.stdout + res.stderr)
+
+    def test_generic_patterns_in_tracked_files_pass(self):
+        with open(self.list, "a", encoding="utf-8") as f:
+            f.write("/tmp/\n")
+        with open(os.path.join(self.repo, "planning", "paths.md"), "w", encoding="utf-8") as f:
+            f.write("temp files go under /tmp/x\n")
+        self.git("add", ".")
+        self.git("commit", "-q", "-m", "add paths")
+        res = self.finish()
+        self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+        self.assertIn("generic", res.stdout)
 
     def test_clean_branch_passes(self):
         res = self.finish()

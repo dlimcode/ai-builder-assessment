@@ -8,8 +8,10 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   sandbox settings list `~/Documents` and `~/Developer` as read-denied for the shell, with this repo allowed.
 - Helped / failed: unknown; the dry run (recipe stops at once, shell canary `cat`, subagent canary Read) ran in
   Danish's terminal before this session, and its three answers were not given to the agent. Not invented here.
-- Corrected by: none yet; Danish to add the three answers (stop / BLOCKED / BLOCKED, or what he saw).
-- Commit: none
+- Corrected by: Danish, at 02:15: the dry run ran at 01:31. `/build` loaded under the fence; a shell `cat` of a test
+  file under `~/Documents` was blocked by auto mode (his permission check, so still not proof of the deny rule or the
+  sandbox); a subagent's Read of it was blocked too. Both canaries came back blocked, as expected
+- Commit: none (recorded in the commit after the 02:15 entries)
 
 ## 01:36 Fixtures committed alone, against the brief's one-commit rule
 - Agent did: committed task 1's fixtures as their own commit (18e6421)
@@ -141,6 +143,27 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   block; the no-space pass counts only matches that cross a line break; loaded text ends only at a `⏺` reply, so
   the prompt after it is cut too (safe). No second recheck: the unit-end re-review reads this fix
 - Commit: the fix commit after this entry
+
+## 02:15 Danish: a real folder name sat in the scrub tests and two saved reviews
+- Agent did: copied a reviewer's example path into `tests/test_scrub.py` and saved two reviews holding it; the
+  reviewer had taken the folder name from this session's sandbox settings
+- Helped / failed: failed; the name is Danish's own folder. It is now the invented "Old Shoebox" in the test and
+  both reviews (each review says it was edited, and why). The old name is still in three branch commits (accb3c6,
+  60d5e4b, cc51f43) and in the git-ignored local exports under `.review/`; no commit message holds it
+- Corrected by: Danish. How it leaves history before any push: rewrite the branch from main, replacing the name in
+  every commit's files (`git filter-branch --tree-filter` over `main..build/check-citations`), then drop the backup
+  refs and expire the reflog so no local ref points at the old commits; nothing is pushed until then. Danish's call
+- Commit: the commit after this entry
+
+## 02:15 finish-sitting could never pass: generic path patterns are now reported, not failed
+- Agent did: built pass 5 to fail on any list hit, while `scrub.py` and its tests must name path roots like `/tmp`
+- Helped / failed: failed (Danish's catch); with a generic entry on his list, every run would fail
+- Corrected by: a short set in `scrub.py` (`GENERIC`), chosen from what tracked files really hold: `/Users`,
+  `/private`, `/private/tmp`, `/private/var/folders`, `/var/folders`, `/tmp`, `/home`, `/Volumes`, `Documents`,
+  `Developer`, `~/Documents`, `~/Developer`, `.claude`, `~/.claude`. A list entry exactly equal to one (any case,
+  trailing `/` ignored) has its hits listed in the report's own section and printed as a count; every other entry
+  still fails. Two tests (check-only, and finish-sitting in a throwaway repo)
+- Commit: the commit after this entry
 
 ## Lows
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened
