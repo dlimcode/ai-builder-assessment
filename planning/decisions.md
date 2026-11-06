@@ -248,6 +248,19 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   on the real export with a stand-in list (not Danish's), the export is written and 0 hits remain; his list is not
   tried. The repo check is unchanged: every phrase was already in tracked files, which it passed
 - Corrected by: Danish
+- Commit: 6be8f92
+
+## 03:06 The fix's review: a real word could still pass beside a generic phrase
+- Agent did: in 6be8f92 blanked each generic phrase before matching, so a hit running past one was hidden too,
+  and the bare `~/Documents` rule looked only at the next character
+- Helped / failed: the review helped (1 High, 1 Medium: planning/reviews/fix-2-review-1.md). F1: `~/Documents/`
+  then a line break and a folder passed. F2: a longer word starting with a phrase (`/Users/alexandra`) passed.
+  The 02:59 entry's "the text around it is still checked" was not true until this fix
+- Corrected by: nothing is blanked now. A hit is generic only if it lies wholly inside a generic place in the text
+  (checked by position); each phrase needs a non-letter after it; bare `~/Documents` takes no folder after it, past
+  whitespace too. The cost, on the safe side: `~/Documents/` at a line end before any word now fails. The
+  reviewer's ten failure paths are in the test, red on 6be8f92. `../claude-501x` (a made-up folder in
+  task-4-review-1) is listed, since the boundary now fails it. Stand-in list run on the real export: written, 0 hits
 - Commit: the commit after this entry
 
 ## 02:59 This fix session's log is not exported

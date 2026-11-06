@@ -288,10 +288,11 @@ class CommandTests(unittest.TestCase):
         # Entries that hit only inside the build's own text: a made-up test path, a bare ~/Documents (entry written
         # as the home path), the scrub's email pattern and the harness temp folder, the last split by wrapping.
         home = os.path.expanduser("~")
-        listed = self.path("g.txt", "/Users/someone\n%s/Documents\n@example.com\nclaude-501\nAcme Widgets\n" % home)
+        listed = self.path("g.txt", "/Users/someone\n%s/Documents\n@example.com\nclaude-501\nAcme Widgets\nAlexandra\n"
+                           "%s/Documents/Clients\n" % (home, home))
         log = self.path("log.txt", "test path /Users/someone/x, /USERS/someone/y and -Users-alex\n"
-                        "read ~/Documents, then ~/Documents/\nthe pattern \"@example.com\" and [A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\n"
-                        "temp <tmp>/cl\naude-501/x\n")
+                        "read ~/Documents, then `~/Documents/`\nthe pattern \"@example.com\" and "
+                        "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\ntemp <tmp>/cl\naude-501/x\n")
         res = run(log, self.out, listed, self.report)
         self.assertEqual(res.returncode, 0, res.stderr)
         self.assertTrue(os.path.exists(self.out))
@@ -300,8 +301,11 @@ class CommandTests(unittest.TestCase):
         for n in (1, 2, 3, 4):
             self.assertIn("list line %d" % n, text.split("list hits:")[0])
         self.assertEqual(self.last_line(), "private list: 0 hits")
-        # Anything past a generic phrase is still checked: a folder under ~/Documents, a listed word after one.
-        for text in ["see ~/Documents/Zephyr\n", "~/Documents Acme Widgets\n", "-Users-alex/Acme Widgets\n"]:
+        # A hit that runs past a generic place, or a longer word starting with one, still fails: a folder under
+        # ~/Documents (also past a line break or a space), a listed word after one, a name starting /Users/alex.
+        for text in ["see ~/Documents/Zephyr\n", "~/Documents Acme Widgets\n", "-Users-alex/Acme Widgets\n",
+                     "see ~/Documents/\nClients/notes\n", "see ~/Documents\n/Clients\n", "see ~/Documents/ Clients\n",
+                     "cd /Users/alexandra/work\n", "-Users-alexandra-work\n", "/Users/alex\nandra\n", "claude-5017\n"]:
             with self.subTest(text=text):
                 self.assertEqual(run(self.path("d.txt", text), self.out, listed, self.report).returncode, 1)
 

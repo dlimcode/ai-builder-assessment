@@ -197,9 +197,9 @@ def scrub(text, paths):
 
 def flatten(text, space):
     """Lower-cased text with each whitespace run (line breaks, indents, tabs, no-break spaces) turned into
-    `space`, and the line each kept character came from."""
-    chars, lines, line, gap = [], [], 1, False
-    for c in text:
+    `space`, and the line and the place in text each kept character came from."""
+    chars, lines, raws, line, gap = [], [], [], 1, False
+    for i, c in enumerate(text):
         if c.isspace():
             line += c == "\n"
             gap = True
@@ -207,27 +207,30 @@ def flatten(text, space):
         if gap and chars and space:
             chars.append(space)
             lines.append(line)
+            raws.append(i)
         gap = False
         for low in c.lower():
             chars.append(low)
             lines.append(line)
-    return "".join(chars), lines
+            raws.append(i)
+    return "".join(chars), lines, raws
 
 
-def list_hits(text, patterns, username):
+def list_hits(text, patterns, username, spans=()):
     """Pass 5. Returns (hits as (line, list entry number), username hits as (line, 40 characters around)).
     Matched twice: whitespace runs as one space, and all whitespace removed, so a word split by terminal
-    wrapping, an indent or a tab still matches."""
+    wrapping, an indent or a tab still matches. A hit wholly inside one of spans ((start, end) in text) is left out."""
     hits, user_lines = set(), {}
     for space in (" ", ""):
-        flat, lines = flatten(text, space)
+        flat, lines, raws = flatten(text, space)
         for n, forms in enumerate(patterns, 1):
             for p in {space.join(f.lower().split()) for f in ((forms,) if isinstance(forms, str) else forms)}:
-                hits.update(match(p, flat, lines, n, space.join(username.lower().split()), user_lines, space == ""))
+                hits.update(match(p, flat, lines, n, space.join(username.lower().split()), user_lines, space == "",
+                                  raws, spans))
     return sorted(hits), sorted(user_lines.items())
 
 
-def match(p, flat, lines, n, user, user_lines, crossing):
+def match(p, flat, lines, n, user, user_lines, crossing, raws, spans):
     """(line, entry number) for each place p is in flat; the username's places go to user_lines instead."""
     found = set()
     if not p or p in ("~", ".", "<tmp>", "<repo-folder>"):
@@ -238,7 +241,7 @@ def match(p, flat, lines, n, user, user_lines, crossing):
         line = lines[m.start()]
         if p == user:
             user_lines.setdefault(line, flat[max(0, m.start() - 20):m.end() + 20])
-        else:
+        elif not any(s <= raws[m.start()] and raws[m.end() - 1] < e for s, e in spans):
             found.add((line, n))
     return found
 
@@ -276,18 +279,14 @@ def spaced(literal):
     return r"\s*".join(re.escape(c) for c in literal)
 
 
-# Text the build itself puts in the export: made-up test paths, a bare ~/Documents (nothing after it), the scrub's
-# own email pattern and the harness temp folder. A list hit wholly inside one is reported, not failed; the text
-# around it, and any folder under ~/Documents, is still checked.
-GENERIC_TEXT = re.compile("|".join([spaced(s) for s in (
+# Text the build itself puts in the export: made-up test paths, a bare ~/Documents (no folder after it, even past a
+# line break), the scrub's own email pattern and the harness temp folder. A list hit wholly inside one of these
+# places is reported, not failed; a hit that runs past one, or a longer word that starts with one, is still failed.
+GENERIC_TEXT = re.compile("|".join([spaced(s) + r"(?![A-Za-z0-9])" for s in (
     "/Users/alex", "-Users-alex", "/Users/someone", "~/Documents/Old Shoebox", "@example.com",
-    r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", "claude-501")] + [spaced("~/Documents") + r"/?(?![/\w.-])"]),
+    r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", "claude-501", "../claude-501x")]
+    + [spaced("~/Documents") + r"(?:/(?!\s*[\w.-])|(?!\s*/)(?![\w.-]))"]),
     re.IGNORECASE)  # the list matches any case, so its generic text must too
-
-
-def mask_generic(text):
-    """The text with each GENERIC_TEXT match blanked, its line breaks kept so line numbers do not move."""
-    return GENERIC_TEXT.sub(lambda m: "<generic>" + "\n" * m.group(0).count("\n"), text)
 
 
 def split_generic(entries):
@@ -306,7 +305,8 @@ def write_report(path, body, hits, users, generic):
     tail = "private list: 0 hits" if not hits else "private list: %d hits (listed above)" % len(hits)
     with open(path, "w", encoding="utf-8") as f:
         f.write("\n".join(body + ["", "username hits (yours to decide):"] + (users or ["none"])
-                          + ["", "generic pattern hits (allowed, not failed; the sets are GENERIC and GENERIC_TEXT in scrub.py):"]
+                          + ["", "generic pattern hits (allowed, not failed; the sets are GENERIC and GENERIC_TEXT"
+                                 " in scrub.py):"]
                           + (generic or ["none"]) + ["", "list hits:"] + (hits or ["none"]) + ["", tail]) + "\n")
     if generic:
         print("generic pattern hits: %d (allowed; read them in %s)" % (len(generic), path))
@@ -337,7 +337,8 @@ def main(argv):
     text, changes = scrub(read(export), paths)
     forms = with_path_forms(private, paths)
     all_hits, users = hit_lines("scrubbed", *list_hits(text, forms, user))
-    hits = hit_lines("scrubbed", list_hits(mask_generic(text), forms, user)[0], [])[0]
+    spans = [m.span() for m in GENERIC_TEXT.finditer(text)]
+    hits = hit_lines("scrubbed", list_hits(text, forms, user, spans)[0], [])[0]
     generic_hits = hit_lines("scrubbed", list_hits(text, generic, user)[0], [])[0]
     generic_hits += [h for h in all_hits if h not in hits]
     counts = {}
