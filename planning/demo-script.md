@@ -29,8 +29,10 @@ before recording and update any number that moved.
   (`wrong line, found at notes.md:3`) and the `/etc/hosts:1` line, `refused: outside root`: an absolute
   path is never opened.
 - The reviewers' notes against the final code: `python3 check_citations.py planning/reviews/*.md --root .`
-  Measured: 40 references, 0 red, 37 not checked: the reviewers wrapped their citations in backticks, which the
-  checker treats as examples. Say so: an honest limit, and the next rule to give reviewers.
+  Measured at the unit end: 209 references, 33 hold, 26 red, 141 not checked. The reds are real: where a fix
+  removed the words a reviewer quoted, it says "not in file" (e.g. the README lines the docs review flagged); where
+  a fix moved them, "wrong line, found at" the new line (e.g. `scrub.py:221` now at 235). Most citations are
+  "not checked" because many reviewers wrapped them in backticks. Say both aloud.
 
 ## 5. Cut (40 s)
 Three said aloud: `...` inside a quote (taken literally, and the line says it is not supported); fuzzy or

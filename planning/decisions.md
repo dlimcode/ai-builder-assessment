@@ -11,7 +11,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Corrected by: Danish, at 02:15: the dry run ran at 01:31. `/build` loaded under the fence; a shell `cat` of a test
   file under `~/Documents` was blocked by auto mode (his permission check, so still not proof of the deny rule or the
   sandbox); a subagent's Read of it was blocked too. Both canaries came back blocked, as expected
-- Commit: none (recorded in the commit after the 02:15 entries)
+- Commit: eaaef3a (the dry-run answers; the entry itself first in b0ead5d)
 
 ## 01:36 Fixtures committed alone, against the brief's one-commit rule
 - Agent did: committed task 1's fixtures as their own commit (18e6421)
@@ -67,7 +67,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   (2) the username is the login name, and its hits are listed apart, not failed; (3) pass 5 runs twice, with line
   breaks removed and with them as spaces, so "Acme\nWidgets" also matches. 200 lines, not 02's "about 40"
 - Corrected by: none yet; Danish's read of the pass-1 counts in the real report closes (1)
-- Commit: see the scrub commit after this entry
+- Commit: ef0fdaa
 
 ## 01:46 Three entry times were guessed, not read from the clock
 - Agent did: wrote the 01:41 (task 2 review), 01:45 (task 4 review) and 01:46 (scrub) entries with guessed times
@@ -83,7 +83,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   The planning-notes run already has a real red (the `build-brief.md:15` miscite), so by card 3 (a) the planted
   edit is not used; the demo script says both
 - Corrected by: none; the next reviewer brief could ask for citations outside backticks
-- Commit: the demo script commit after this entry
+- Commit: 68f73d6
 
 ## 01:49 The unclosed-quote fix let a curly quote close at a straight mark inside it
 - Agent did: in fix a95a1be, let a curly open close at either mark, so `“The kettle" boils fast”` was cut to
@@ -91,7 +91,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Helped / failed: failed; the recheck (planning/reviews/task-4-recheck-1.md) caught the new false green
 - Corrected by: a curly open now closes at `”`, and at a straight mark only when no `”` follows on the line; one test
   pins it. No second recheck: the unit-end reviewer re-reads this fix
-- Commit: the fix commit after this entry
+- Commit: 0cb53ca
 
 ## 01:54 Task 7's review: the scrub let private text through in seven reproduced ways
 - Agent did: built the scrub line by line, matched list words literally, checked only the working tree, and left an
@@ -102,7 +102,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   `git log -p main..HEAD`; F6 a failing run removes `logs/session.txt`. Wave 2 next: F4, F5, F7
 - Corrected by: the review. F3 changes the brief's rule "a hit is fixed by a new commit": a new commit fixes the
   files, not history, so a hit in history needs the branch rewritten before any push. That is Danish's call
-- Commit: the wave-1 fix commit after this entry
+- Commit: 2aa7047
 
 ## 01:56 Scrub wave 2: path-shaped list entries, empty lists, quoted lines in loaded text
 - Agent did: fixed task-7-review-1 F4 (list entries also matched in their `~/...` form), F5 (list read as
@@ -111,7 +111,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Helped / failed: helped; one new test was wrong at first (it expected `#Acme Widgets` to match text without the
   `#`), corrected to match the entry as written
 - Corrected by: the agent, on reading the failure
-- Commit: the wave-2 fix commit after this entry
+- Commit: 354f07e
 
 ## 01:57 Unit-end checker review: the demo script made 2 unexplained reds
 - Agent did: wrapped a backticked example in `planning/demo-script.md` across two lines; the checker scans line by
@@ -120,7 +120,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Corrected by: the reviewer's pick: the demo lines rewrapped so each code span sits on one line; README now says a
   code span is skipped only on one line, and names wrapped inline code and paths with spaces under "What was cut".
   The dog-food run is back to 19 reds, the ones explained at 01:39. The parser limit stays (noisy, never a false green)
-- Commit: the fix commit after this entry
+- Commit: 65a489a
 
 ## 01:59 Unit-end docs review: the README claimed what had not happened yet
 - Agent did: wrote README's "How it was built" as if the unit end and the log export were done, and said each
@@ -131,7 +131,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Corrected by: the section now says only what is true at merge time: reviews and rechecks as done, fixes may
   share a commit, decisions written during the sitting with three corrected times, and the log present only if
   the scrub after the session was clean
-- Commit: the fix commit after this entry
+- Commit: 65a489a
 
 ## 02:06 The scrub recheck: the fixes cut and matched too much
 - Agent did: in the scrub fix waves, let any opening reminder tag start a cut, matched list words with all spaces
@@ -142,7 +142,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Corrected by: at depth 0 only a tag that starts its line (after an indent, tree glyphs or a closing tag) opens a
   block; the no-space pass counts only matches that cross a line break; loaded text ends only at a `⏺` reply, so
   the prompt after it is cut too (safe). No second recheck: the unit-end re-review reads this fix
-- Commit: the fix commit after this entry
+- Commit: 2c4d52c
 
 ## 02:15 Danish: a real folder name sat in the scrub tests and two saved reviews
 - Agent did: copied a reviewer's example path into `tests/test_scrub.py` and saved two reviews holding it; the
@@ -153,7 +153,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Corrected by: Danish. How it leaves history before any push: rewrite the branch from main, replacing the name in
   every commit's files (`git filter-branch --tree-filter` over `main..build/check-citations`), then drop the backup
   refs and expire the reflog so no local ref points at the old commits; nothing is pushed until then. Danish's call
-- Commit: the commit after this entry
+- Commit: eaaef3a
 
 ## 02:15 finish-sitting could never pass: generic path patterns are now reported, not failed
 - Agent did: built pass 5 to fail on any list hit, while `scrub.py` and its tests must name path roots like `/tmp`
@@ -163,7 +163,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   `Developer`, `~/Documents`, `~/Developer`, `.claude`, `~/.claude`. A list entry exactly equal to one (any case,
   trailing `/` ignored) has its hits listed in the report's own section and printed as a count; every other entry
   still fails. Two tests (check-only, and finish-sitting in a throwaway repo)
-- Commit: the commit after this entry
+- Commit: eaaef3a
 
 ## 02:18 Unit-end scrub review: the saved session file, indented blocks, slashes, main's history
 - Agent did: built the scrub for the `/export` text only, with block ends that assumed unindented lists and headings
@@ -173,14 +173,14 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   records' strings, each after a reply mark, so markers start lines and escaped line breaks are real; F2 lists and
   headings may be indented, in one pass (was quadratic); F5 a list entry's trailing `/` is dropped; F6 the history
   check covers every commit from HEAD, main's too, without author lines (also answers recheck F3a). F7 is next
-- Commit: the fix commit after this entry
+- Commit: ad698d1
 
 ## 02:18 Scrub: a hit's line number now points at a file that exists
 - Agent did: on a hit, the report named lines of a scrubbed log that was never written (unit-review-scrub F7)
 - Helped / failed: the review helped; the no-space half of F7 was already fixed in 2c4d52c
 - Corrected by: on a hit, the scrubbed text is written beside the report (`<report>.scrubbed.txt`, in the temp
   folder outside the repo) and both messages say where; one test
-- Commit: the fix commit after this entry
+- Commit: 9791fcf
 
 ## 02:28 The unit-end re-review: one regression and one silent fallback in the scrub fixes
 - Agent did: in 2c4d52c let only a line-start tag open a reminder block, which kept a reminder opening after a
@@ -190,7 +190,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Corrected by: closed reminder spans and a `>` before a tag no longer stop it opening a block; a session file is read
   as records when at least half its lines are records, other lines kept as text after their own mark, and the report
   says which path it took. One recheck follows; any finding after that goes to Danish
-- Commit: the fix commit after this entry
+- Commit: 77e261a
 
 ## 02:28 The shell's grep is a wrapper that dropped results for a pattern with a space
 - Agent did: counted the old folder name with `grep -c`, which printed nothing instead of a number
@@ -216,7 +216,15 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   3d68565 -> 77e261a
 - Corrected by: Danish's conditions: this one commit maps every cited hash in decisions and the reviews; the backup
   ref `refs/original/refs/heads/build/check-citations` and the reflog stay until he says to delete them
-- Commit: the commit after this entry
+- Commit: 21e2024
+
+## 02:30 Task 12: decisions read through; the reviewers' notes now go red
+- Agent did: gave every "the commit after this entry" its hash (two set by hand: the scrub entry's first commit,
+  and the dry-run update's), and re-ran the reviewers' notes against the final code
+- Helped / failed: helped; that run went from 0 red to 26 red: fixes removed or moved the lines reviewers quoted,
+  which is card 3 (a)'s real red moment, so the demo script now shows it and still needs no planted edit
+- Corrected by: none
+- Commit: the task 12 commit after this entry
 
 ## Lows
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened
