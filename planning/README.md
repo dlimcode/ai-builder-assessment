@@ -3,7 +3,7 @@
 **Answer: one sitting builds `check_citations.py` (one Python 3.9 file, standard library, no model call), tested by a
 33-row golden set committed before any checker code, plus the log scrub and the demo script: 233 planned minutes and a
 7-minute buffer, 240 in all [assumed]. The demo moment: the checker run on this folder's own notes, then a red line
-with where the words really are now; which red is card 3.**
+with where the words really are now: reviewers' notes against the final code, the staged edit only if that is green (card 3).**
 
 This file is the task list the build brief points to [record planning/build-brief.md:15 "task list, in order"].
 Tags as in 01-04: [Danish] his words, [record path:line "words"], [measured, how], [source, date read], [assumed].
@@ -18,10 +18,10 @@ Danish, in his own terminal: `bash planning/start-sitting.sh --dry-run`. The rec
 [record planning/04-devils-advocate.md:92-93 "the recipe stops at once saying there is nothing to build"]. He then asks
 for a shell `cat` of a one-line canary file under `~/Documents`, and one subagent reading it with the Read tool; both
 should say BLOCKED. `/exit`, then `bash planning/start-sitting.sh`. In the session: add `logs/raw/` and `.review/` to
-`.gitignore` (and `.claude/` if card 2 says keep out); create `planning/decisions.md` with an entry holding the three
+`.gitignore`, and `.claude/` (card 2: keep out); create `planning/decisions.md` with an entry holding the three
 dry-run answers, and a `## Lows` heading. If the shell `cat` was READ, the sitting keeps Danish's own permission mode
 [record planning/03-plan.md:111 "keeps Danish's own permission mode"]; if `/build` did not load, follow this file without it.
-**Done-check:** `git branch --show-current` prints `build/check-citations`; `grep -cxE 'logs/raw/|\.review/' .gitignore` prints `2`.
+**Done-check:** `git branch --show-current` prints `build/check-citations`; `grep -cxE 'logs/raw/|\.review/|\.claude/' .gitignore` prints `3`.
 ### Task 1: Fixtures (15 min)
 `tests/fixtures/`: 01's `notes.md`, `data/plan.txt`, `empty.md` byte for byte; `bin.dat` is three invalid UTF-8 bytes
 (`printf '\377\376\375'`); `report.md` is 01's rows 1-26, H1-H4, then H5-H7 below, one per line. `tests/fixtures-evil/x.md` holds `x`.
@@ -80,7 +80,7 @@ Also: file arguments only; whole files read into memory [record planning/04-devi
 whether commit session trailers stay; commands without `timeout`.
 **Done-check:** `grep -c '^## ' README.md` prints `7`.
 ### Task 9: Demo script (10 min)
-`planning/demo-script.md`: 03 section 4's six points; the red moment as card 3 settles. Run
+`planning/demo-script.md`: 03 section 4's six points; the red moment by card 3 (a): planning notes, then reviewers' notes; the staged edit, said aloud, only if both are green. Run
 `timeout 60 python3 check_citations.py planning/reviews/*.md --root .` now and write down what it shows.
 **Done-check:** `grep -c '^## ' planning/demo-script.md` prints `6`.
 ### Task 10: Clean clone (5 min)
@@ -115,7 +115,7 @@ Checker (tasks 1-6) 115; writing and logs (7, 8, 9, 12, 13) 70 [assumed, added b
 | 03 unit end 20 [record planning/03-plan.md:47 "three fresh reviewers on the branch, fixes"] | 04 F6 | Adapted: unit end 30; per-commit review on tasks 2, 4, 7 only [record planning/04-devils-advocate.md:20 "Or tell the brief: per-commit review on tasks 2, 4 and 7 only"]; 7-min buffer | team; Danish may restore every-commit review (~10 min [assumed]) |
 | 02 scrub, three arguments [record planning/02-demo-input-and-logs.md:119 "python3 scrub.py <export> <private-list> <report-out>"] | [record planning/03-plan.md:117 "<export> <scrubbed-out> <private-list> <report-out>"] | 03's four, as 04 F9 says | team |
 | 01 [record planning/01-prior-art-and-formats.md:4 "a 26-row golden set"] | [record planning/01-prior-art-and-formats.md:99 "rows 1-26 plus H1-H4"]; [record planning/03-plan.md:37 "rows 1-26 then H1-H4"] | 30 rows in 01, 33 with H5-H7 | team |
-| 03's staged red [record planning/03-plan.md:67 "Staged, and said to be staged"] | [record planning/00-options-considered.md:39-40 "the demo shows what it finds rather than a planted error"]; 04 F10 | Open: card 3 | Danish |
+| 03's staged red [record planning/03-plan.md:67 "Staged, and said to be staged"] | [record planning/00-options-considered.md:39-40 "the demo shows what it finds rather than a planted error"]; 04 F10 | Card 3, answered: a (staged edit only as fallback) | Danish |
 | 03 task 6 check on [record planning/03-plan.md:42 "git status --short planning/"] | decisions.md and reviews also change there | Adapted: check only `planning/0*.md` | team |
 | 04 F11: no `timeout` [record planning/04-devils-advocate.md:25 "README commands use no"] | the team brief: hangs get `timeout` | Product README: none; this file's checks: `timeout` | team |
 | 02 "also at" note [record planning/02-demo-input-and-logs.md:52 "line but worth an"] | [record planning/03-plan.md:127 "note when a green quote repeats"] | Cut stands (03) | team |
@@ -151,14 +151,14 @@ Checker (tasks 1-6) 115; writing and logs (7, 8, 9, 12, 13) 70 [assumed, added b
 **Where it comes from:** [record planning/03-plan.md:133 "in the repo is committed"]; [record planning/04-devils-advocate.md:64 "stays out of that commit"].
 **Your options:** (a) keep out: task 0 adds `.claude/` to `.gitignore`; undone by deleting that line. (b) commit it; undone by `git rm --cached` before a push.
 **My pick and the case against it:** (a): nothing in it helps a reader. Against: it holds nothing private, and showing the set-up is honest.
-**Your answer:** `settings: keep out` or `settings: commit`
+**Your answer:** `settings: keep out` or `settings: commit`. Answered 7 Nov ~01:25: "your picks" [Danish], so keep out.
 
 **Card 3: The demo's red moment**
 **What it is:** which red the demo shows, since the run on the notes will likely be all green.
 **Where it comes from:** [record planning/03-plan.md:63 "The demo's red moment: both"] against [record planning/04-devils-advocate.md:24 "Keep the staged edit only as the fallback"].
 **Your options:** (a) notes run, then reviewers' notes against the final code; the staged edit only if that is green, said aloud. (b) 03's: notes run plus the staged edit always. (c) real runs only, green said as green. Each undone by editing `planning/demo-script.md` before recording.
 **My pick and the case against it:** (a): any red it shows is real. Against: reviewers may cite nothing that moved, so the planted fallback may run anyway.
-**Your answer:** `demo red: a`, `demo red: b` or `demo red: c`
+**Your answer:** `demo red: a`, `demo red: b` or `demo red: c`. Answered 7 Nov ~01:25: "your picks" [Danish], so a.
 
 ## What the team assumed
 - Every minute figure and the 7-minute buffer; per-commit fixes on three reviewed commits fit in it [assumed].
