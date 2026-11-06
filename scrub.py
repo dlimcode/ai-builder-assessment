@@ -16,10 +16,11 @@ import tempfile
 
 MESSAGE_START = re.compile(r"^(> |⏺)")  # a prompt or a reply in the export: where a loaded text ends
 HEADING = re.compile(r"^#{1,2} ")
+REMINDER_TAG = re.compile(r"<(/)?system-reminder>")
 # Pass 1: (kind, start marker, where the block ends). A block whose end is never found runs to the end of
 # the file: cutting too much is safe, the report shows it.
 BLOCKS = [
-    ("system-reminder", re.compile(r"<system-reminder>"), "closing tag"),
+    ("system-reminder", re.compile(r"^<cut: system-reminder, \d+ lines>$"), "this line"),
     ("sandbox text", re.compile(r"^## Bash command sandbox"), "next heading"),
     ("skills list", re.compile(r"^The following skills are available"), "end of list"),
     ("skill text", re.compile(r"^Base directory for this skill"), "next message"),
@@ -40,9 +41,9 @@ SECRETS = [
 
 def block_end(lines, i, how):
     """Index of the first line after the block that starts at lines[i]."""
+    if how == "this line":
+        return i + 1
     for j in range(i, len(lines)):
-        if how == "closing tag" and "</system-reminder>" in lines[j]:
-            return j + 1
         if j == i:
             continue
         if how == "next heading" and HEADING.match(lines[j]):
@@ -54,9 +55,32 @@ def block_end(lines, i, how):
     return len(lines)
 
 
+def cut_reminders(text):
+    """Cut each outermost reminder block, from its opening tag to the matching closing tag (or the end of the
+    file), wherever on a line the tags sit; the cut stands on its own line."""
+    out, depth, start, pos = [], 0, 0, 0
+    for m in REMINDER_TAG.finditer(text):
+        if m.group(1) is None:
+            if depth == 0:
+                out.append(text[pos:m.start()])
+                start = m.start()
+            depth += 1
+        elif depth:
+            depth -= 1
+            if depth == 0:
+                out.append(reminder_cut(text[start:m.end()]))
+                pos = m.end()
+    out.append(reminder_cut(text[start:]) if depth else text[pos:])
+    return "".join(out)
+
+
+def reminder_cut(block):
+    return "\n<cut: system-reminder, %d lines>\n" % (block.count("\n") + 1)
+
+
 def cut_blocks(text):
     """Pass 1: each start-up block becomes one line, so later line numbers match the scrubbed file."""
-    lines, out, changes, i = text.split("\n"), [], [], 0
+    lines, out, changes, i = cut_reminders(text).split("\n"), [], [], 0
     while i < len(lines):
         block = next(((kind, how) for kind, start, how in BLOCKS if start.search(lines[i])), None)
         if not block:
@@ -64,7 +88,7 @@ def cut_blocks(text):
             i += 1
             continue
         end = block_end(lines, i, block[1])
-        placeholder = "<cut: %s, %d lines>" % (block[0], end - i)
+        placeholder = lines[i] if block[1] == "this line" else "<cut: %s, %d lines>" % (block[0], end - i)
         out.append(placeholder)
         changes.append((len(out), "block", placeholder))
         i = end
@@ -112,29 +136,42 @@ def scrub(text, paths):
     return text, sorted(changes)
 
 
+def flatten(text, space):
+    """Lower-cased text with each whitespace run (line breaks, indents, tabs, no-break spaces) turned into
+    `space`, and the line each kept character came from."""
+    chars, lines, line, gap = [], [], 1, False
+    for c in text:
+        if c.isspace():
+            line += c == "\n"
+            gap = True
+            continue
+        if gap and chars and space:
+            chars.append(space)
+            lines.append(line)
+        gap = False
+        for low in c.lower():
+            chars.append(low)
+            lines.append(line)
+    return "".join(chars), lines
+
+
 def list_hits(text, patterns, username):
-    """Pass 5. Returns (hits as (line, list entry number), username hits as (line, 40 characters around))."""
-    hits, user_hits = set(), set()
-    for joiner in ("", " "):  # with line breaks removed, a word split by terminal wrapping still matches
-        lines = text.replace("\r", "").split("\n")
-        starts, pos = [], 0
-        for l in lines:
-            starts.append(pos)
-            pos += len(l) + len(joiner)
-        flat = joiner.join(lines).lower()
+    """Pass 5. Returns (hits as (line, list entry number), username hits as (line, 40 characters around)).
+    Matched twice: whitespace runs as one space, and all whitespace removed, so a word split by terminal
+    wrapping, an indent or a tab still matches."""
+    hits, user_lines = set(), {}
+    for space in (" ", ""):
+        flat, lines = flatten(text, space)
         for n, pattern in enumerate(patterns, 1):
-            p = pattern.lower()
+            p = space.join(pattern.lower().split())
             if not p:
-                continue  # a blank or comment line in the list keeps its number but matches nothing
+                continue  # a blank line in the list keeps its number but matches nothing
             for m in re.finditer(re.escape(p), flat):
-                line = bisect.bisect_right(starts, m.start())
-                if p == username.lower():
-                    user_hits.add((line, flat[max(0, m.start() - 20):m.end() + 20]))
+                line = lines[m.start()]
+                if p == space.join(username.lower().split()):
+                    user_lines.setdefault(line, flat[max(0, m.start() - 20):m.end() + 20])
                 else:
                     hits.add((line, n))
-    user_lines = {}
-    for line, context in sorted(user_hits):
-        user_lines.setdefault(line, context)
     return sorted(hits), sorted(user_lines.items())
 
 
@@ -189,7 +226,9 @@ def main(argv):
     body += ["  line %d: %s -> %s" % c for c in changes] or ["  none"]
     write_report(report, body, hits, users)
     if hits:
-        print("private-list hits: %s not written; see %s" % (out, report), file=sys.stderr)
+        if os.path.exists(out):
+            os.remove(out)  # an earlier clean run's log may hold a word listed since
+        print("private-list hits in the export: %s not written; see %s" % (out, report), file=sys.stderr)
         return 1
     with open(out, "w", encoding="utf-8") as f:
         f.write(text)

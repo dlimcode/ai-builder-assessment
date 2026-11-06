@@ -16,24 +16,32 @@ cd "$repo"
 git rev-parse --verify -q main >/dev/null || { echo "stop: no main branch to compare commit messages against"; exit 1; }
 
 tmp=$(mktemp -d "${TMPDIR:-/tmp}/scrub.XXXXXX") || exit 1
-status=0
 
-python3 scrub.py logs/raw/session.txt logs/session.txt "$list" "$tmp/scrub-report.txt" || status=1
+export_hit=0; repo_hit=0
+python3 scrub.py logs/raw/session.txt logs/session.txt "$list" "$tmp/scrub-report.txt" || export_hit=1
 
-git log --format=%B main..HEAD > "$tmp/commit-messages.txt"
+# Every branch commit, message and diff: a word a later commit removed is still in history.
+git log -p main..HEAD > "$tmp/branch-history.txt"
 git ls-files -z > "$tmp/files"
-set -- "$tmp/commit-messages.txt"
+set -- "$tmp/branch-history.txt"
 while IFS= read -r -d '' f; do
   [ -f "$f" ] && set -- "$@" "$f"
 done < "$tmp/files"
-python3 scrub.py --check-only "$list" "$tmp/check-report.txt" "$@" || status=1
+python3 scrub.py --check-only "$list" "$tmp/check-report.txt" "$@" || repo_hit=1
 
 echo "scrub report:  $tmp/scrub-report.txt"
 echo "check report:  $tmp/check-report.txt"
 echo "last lines:    $(tail -1 "$tmp/scrub-report.txt") | $(tail -1 "$tmp/check-report.txt")"
-if [ "$status" -eq 0 ]; then
-  echo "clean. Read both reports and logs/session.txt in full before committing logs/session.txt."
-else
-  echo "hits found: fix each by a new commit (nothing is pushed), then run this again."
+if [ "$export_hit" -eq 1 ]; then
+  echo "hits in the export: logs/session.txt is not written. Take the word out of the export, or say in README.md"
+  echo "why the log is not committed."
 fi
-exit "$status"
+if [ "$repo_hit" -eq 1 ]; then
+  echo "hits in tracked files or branch history (branch-history.txt): a new commit fixes the files, not history;"
+  echo "the branch must be rewritten before any push."
+fi
+if [ "$export_hit" -eq 0 ] && [ "$repo_hit" -eq 0 ]; then
+  echo "clean. Read both reports and logs/session.txt in full before committing logs/session.txt."
+  exit 0
+fi
+exit 1

@@ -1,6 +1,7 @@
 """Tests for scrub.py, on a made-up log and a made-up three-line private list only."""
 import getpass
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -105,6 +106,20 @@ class ScrubTests(unittest.TestCase):
         hits, _ = scrub.list_hits("the Acme Wid\ngets tender\n", PATTERNS, USER)
         self.assertTrue(hits)
 
+    def test_two_reminders_on_one_line_and_nested_are_both_cut(self):
+        text = "<system-reminder>\none\n</system-reminder><system-reminder>\nGit user: Acme Widgets\n</system-reminder>\n"
+        text += "<system-reminder> a <system-reminder> b </system-reminder> INNER secret-project </system-reminder>\nkept\n"
+        out, _ = scrub.scrub(text, PATHS)
+        self.assertEqual(scrub.list_hits(out, PATTERNS, USER)[0], [])
+        self.assertNotIn("INNER", out)
+        self.assertIn("kept", out)
+
+    def test_wrapped_and_spaced_words_are_caught(self):
+        for text in ["the Acme\n  Widgets tender", "Acme Wid\n  gets", "Acme  Widgets", "Acme\tWidgets",
+                     "Acme\u00a0Widgets", "Acme\nWidgets"]:
+            with self.subTest(text=text):
+                self.assertTrue(scrub.list_hits(text, PATTERNS, USER)[0])
+
     def test_list_match_ignores_case(self):
         hits, _ = scrub.list_hits("SECRET-PROJECT\n", PATTERNS, USER)
         self.assertTrue(hits)
@@ -150,6 +165,14 @@ class CommandTests(unittest.TestCase):
         self.assertFalse(os.path.exists(self.out))
         self.assertNotEqual(self.last_line(), "private list: 0 hits")
 
+    def test_a_failing_run_removes_an_earlier_scrubbed_log(self):
+        log = self.path("log.txt", "clean text\n")
+        self.assertEqual(run(log, self.out, self.list, self.report).returncode, 0)
+        self.assertTrue(os.path.exists(self.out))
+        self.path("log.txt", "now with Acme Widgets\n")
+        self.assertNotEqual(run(log, self.out, self.list, self.report).returncode, 0)
+        self.assertFalse(os.path.exists(self.out))
+
     def test_check_only_over_many_files(self):
         a = self.path("a.txt", "clean\n")
         b = self.path("b.txt", "acme widgets here\n")
@@ -163,6 +186,59 @@ class CommandTests(unittest.TestCase):
 
     def test_wrong_arguments_exit_2(self):
         self.assertEqual(run("only-one").returncode, 2)
+
+
+class FinishSittingTests(unittest.TestCase):
+    """finish-sitting.sh in a throwaway repo, in its own temp folder outside every repo."""
+
+    def git(self, *args):
+        return subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@example.invalid", "-c",
+                               "core.hooksPath=/dev/null", "-c", "commit.gpgsign=false", *args],
+                              cwd=self.repo, capture_output=True, text=True, timeout=60)
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.repo = os.path.join(self.tmp.name, "r")
+        os.makedirs(os.path.join(self.repo, "planning"))
+        if self.git("init", "-q", "-b", "main").returncode != 0:
+            self.fail("git init failed; stopping before any git command can reach a real repo")
+        self.assertTrue(os.path.isdir(os.path.join(self.repo, ".git")))
+        shutil.copy(SCRUB, self.repo)
+        shutil.copy(os.path.join(REPO, "planning", "finish-sitting.sh"), os.path.join(self.repo, "planning"))
+        self.git("add", ".")
+        self.git("commit", "-q", "-m", "start")
+        self.git("switch", "-q", "-c", "build")
+        self.list = os.path.join(self.tmp.name, "list.txt")
+        with open(self.list, "w", encoding="utf-8") as f:
+            f.write("Zephyr Holdings\n")
+        os.makedirs(os.path.join(self.repo, "logs", "raw"))
+        with open(os.path.join(self.repo, "logs", "raw", "session.txt"), "w", encoding="utf-8") as f:
+            f.write("a clean log\n")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def finish(self):
+        env = dict(os.environ, TMPDIR=self.tmp.name)
+        return subprocess.run(["bash", "planning/finish-sitting.sh", self.list], cwd=self.repo,
+                              capture_output=True, text=True, timeout=120, env=env)
+
+    def test_a_word_removed_by_a_later_commit_is_still_caught(self):
+        notes = os.path.join(self.repo, "planning", "my notes.md")
+        with open(notes, "w", encoding="utf-8") as f:
+            f.write("about Zephyr Holdings\n")
+        self.git("add", ".")
+        self.git("commit", "-q", "-m", "add notes")
+        with open(notes, "w", encoding="utf-8") as f:
+            f.write("about nothing\n")
+        self.git("commit", "-q", "-am", "remove the word")
+        res = self.finish()
+        self.assertNotEqual(res.returncode, 0, res.stdout + res.stderr)
+
+    def test_clean_branch_passes(self):
+        res = self.finish()
+        self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+        self.assertTrue(os.path.exists(os.path.join(self.repo, "logs", "session.txt")))
 
 
 if __name__ == "__main__":

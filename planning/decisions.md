@@ -91,6 +91,17 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   pins it. No second recheck: the unit-end reviewer re-reads this fix
 - Commit: the fix commit after this entry
 
+## 01:54 Task 7's review: the scrub let private text through in seven reproduced ways
+- Agent did: built the scrub line by line, matched list words literally, checked only the working tree, and left an
+  old scrubbed log in place on a failing run
+- Helped / failed: the review helped (3 High, 4 Medium, 3 Low, planning/reviews/task-7-review-1.md); the gaps were
+  the agent's. Wave 1 (at most four): F1 reminder tags cut by depth, by character position; F2 list words matched
+  with whitespace runs as one space and with all whitespace removed; F3 `finish-sitting.sh` also checks
+  `git log -p main..HEAD`; F6 a failing run removes `logs/session.txt`. Wave 2 next: F4, F5, F7
+- Corrected by: the review. F3 changes the brief's rule "a hit is fixed by a new commit": a new commit fixes the
+  files, not history, so a hit in history needs the branch rewritten before any push. That is Danish's call
+- Commit: the wave-1 fix commit after this entry
+
 ## Lows
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened
   (patch `open`), a permission-denied file as "file missing"
@@ -109,3 +120,8 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - task-4-recheck-1 F2, `check_citations.py:130`: an opened but empty quote (`"`, `""`, `"**"`) is still "line only"
 - task-4-recheck-1 F3, `check_citations.py:65`: a quote wrapped onto the next report line is checked on its first
   line's words only, and can come out "holds"
+- task-7-review-1 F8, `scrub.py` pass 2: `/System/Volumes/Data/Users/...`, lower-case `/users/...` and URL-encoded
+  home paths survive pass 2 (they show as username hits only)
+- task-7-review-1 F9, `scrub.py` SECRETS: a private key with no END line, lower-case `bearer`, a dash-written MAC
+- task-7-review-1 F10, `scrub.py` `read`: a non-UTF-8 export or list is read with replacement characters, so
+  matches can silently fail
