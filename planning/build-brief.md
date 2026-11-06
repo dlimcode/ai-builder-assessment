@@ -1,7 +1,7 @@
 ---
 skill: build
 branch: build/check-citations
-status: in-progress
+status: blocked-on-human
 question: |
   What: merge build/check-citations into main, once the checks pass and the logs are scrubbed?
 ---

@@ -224,7 +224,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Helped / failed: helped; that run went from 0 red to 26 red: fixes removed or moved the lines reviewers quoted,
   which is card 3 (a)'s real red moment, so the demo script now shows it and still needs no planted edit
 - Corrected by: none
-- Commit: the task 12 commit after this entry
+- Commit: ee37a87
 
 ## Lows
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened
@@ -286,3 +286,10 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - unit-rereview-fixes F6, `planning/finish-sitting.sh`: "without author lines" has no test
 - unit-rereview-fixes F7: the demo's reviews-run numbers are stale (task 12 re-measures)
 - unit-rereview-fixes Q1: whether a skill's header and body share one record in the saved session file is unseen
+- unit-rereview-recheck-1 F1, `scrub.py:164,182`: if half or more lines are JSON, a text export is read as records
+  and each text line's own reply mark ends a skill's cut after one line
+- unit-rereview-recheck-1 F2, `scrub.py:182`: a bad line in a records file is kept almost raw (its own loaded text not
+  cut, only `\n` unescaped); cutting it whole is the suggested fix
+- unit-rereview-recheck-1 F3, `tests/test_scrub.py:202`: the unescape and the half-rule have no test of their own
+- unit-rereview-recheck-1 F4, `scrub.py:22`: a `>` prompt that starts with the tag in prose cuts the rest of the log
+  (safe; shown in the block count)
