@@ -74,6 +74,15 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Corrected by: the agent, on the next `date`: each set to the clock reading taken just before or after it was written
 - Commit: none (corrected before this file's next commit)
 
+## 01:48 Reviewers' notes against the final code: 0 red, 37 of 40 not checked
+- Agent did: ran `python3 check_citations.py planning/reviews/*.md --root .` (task 9)
+- Helped / failed: helped, by showing a limit: the reviewers wrapped their `path:line "words"` citations in
+  backticks, which the checker skips as examples, so the run shows 0 red, 0 holds, 3 line only, 37 not checked.
+  The planning-notes run already has a real red (the `build-brief.md:15` miscite), so by card 3 (a) the planted
+  edit is not used; the demo script says both
+- Corrected by: none; the next reviewer brief could ask for citations outside backticks
+- Commit: the demo script commit after this entry
+
 ## Lows
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened
   (patch `open`), a permission-denied file as "file missing"
