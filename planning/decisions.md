@@ -309,7 +309,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Corrected by: Danish's word: scrub.py is not changed again
 - Commit: 75476d2; the log in 5829fbc
 
-## 03:34 Four new reds in the dog-food run after the merge
+## 03:32 Four new reds in the dog-food run after the merge
 - Agent did: wrote `yes` as a new line under `question:` in `planning/build-brief.md`, which moved every later line
   of the brief down by one
 - Helped / failed: the checker helped; `python3 check_citations.py planning/*.md --root .` on main went from 19 to
