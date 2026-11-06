@@ -3,8 +3,10 @@
 Usage: python3 check_citations.py REPORT.md [REPORT.md ...] [--root DIR]
 Python 3.9 standard library only; no model call, no network.
 """
+import argparse
 import os
 import re
+import sys
 from collections import namedtuple
 
 # line: line number in the report; start/end: cited lines (None when the number is too long to be real)
@@ -133,3 +135,61 @@ def check(ref, root):
     if held:
         return Result("holds", [])
     return Result("wrong line" if places else "not in file", places)
+
+
+RED = {"wrong line", "not in file", "no such line", "file missing", "refused: outside root"}
+COLOUR = {"holds": "32", "line only": "0"}
+
+
+def printable(text):
+    """Drop characters below space except tab, so a report cannot drive the terminal."""
+    return "".join(c for c in text if c >= " " or c == "\t")
+
+
+def show_root(root):
+    root, home = os.path.realpath(root), os.path.expanduser("~")
+    return "~" + root[len(home):] if root == home or root.startswith(home + os.sep) else root
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description="Check that quoted words are on the file line a report cites.")
+    parser.add_argument("reports", nargs="+", metavar="REPORT.md", help="report files (not folders)")
+    parser.add_argument("--root", default=".", help="folder the cited paths are relative to (default: .)")
+    args = parser.parse_args(argv)
+    if not os.path.isdir(args.root):
+        parser.error("--root is not a folder: %s" % args.root)
+    texts = []
+    for report in args.reports:
+        if not os.path.isfile(report):
+            parser.error("not a report file: %s" % report)
+        try:
+            with open(report, encoding="utf-8") as f:
+                texts.append((report, f.read()))
+        except (OSError, UnicodeDecodeError) as e:
+            parser.error("cannot read %s: %s" % (report, e))
+
+    colour = sys.stdout.isatty()
+    counts = {"holds": 0, "line only": 0, "red": 0, "not checked": 0}
+    for report, text in texts:
+        refs, skipped = find_refs(text)
+        counts["not checked"] += skipped
+        for ref in refs:
+            result = check(ref, args.root)
+            red = result.verdict in RED
+            counts["red" if red else result.verdict] += 1
+            verdict = result.verdict
+            if result.found:
+                verdict += ", found at " + ", ".join(result.found)
+            if result.verdict == "not in file" and "..." in (ref.quote or ""):
+                verdict += " (`...` is not supported)"
+            if colour:
+                verdict = "\033[%sm%s\033[0m" % ("31" if red else COLOUR[result.verdict], verdict)
+            print(printable("%s:%d  %s  " % (report, ref.line, ref.raw)) + verdict)
+    total = sum(counts.values())
+    print("%d references: %d holds, %d line only, %d red, %d not checked (root: %s)" % (
+        total, counts["holds"], counts["line only"], counts["red"], counts["not checked"], printable(show_root(args.root))))
+    return 1 if counts["red"] else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
