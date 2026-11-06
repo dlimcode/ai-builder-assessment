@@ -14,18 +14,18 @@ import re
 import sys
 import tempfile
 
-MESSAGE_START = re.compile(r"^(> |⏺)")  # a prompt or a reply in the export: where a loaded text ends
+LEAD = r"^[\s\u23bf\u2502\u2514\u251c\u2500]*"  # an indent or the export's tree glyphs before a marker
 HEADING = re.compile(r"^#{1,2} ")
 REMINDER_TAG = re.compile(r"<(/)?system-reminder>")
 # Pass 1: (kind, start marker, where the block ends). A block whose end is never found runs to the end of
 # the file: cutting too much is safe, the report shows it.
 BLOCKS = [
     ("system-reminder", re.compile(r"^<cut: system-reminder, \d+ lines>$"), "this line"),
-    ("sandbox text", re.compile(r"^## Bash command sandbox"), "next heading"),
-    ("skills list", re.compile(r"^The following skills are available"), "end of list"),
-    ("skill text", re.compile(r"^Base directory for this skill"), "next message"),
-    ("hook output", re.compile(r"^SessionStart"), "next message"),
-    ("rules file", re.compile(r"^Contents of .*CLAUDE\.md"), "next message"),
+    ("sandbox text", re.compile(LEAD + r"## Bash command sandbox"), "next heading"),
+    ("skills list", re.compile(LEAD + r"The following skills are available"), "end of list"),
+    ("skill text", re.compile(LEAD + r"Base directory for this skill"), "next message"),
+    ("hook output", re.compile(LEAD + r"SessionStart"), "next message"),
+    ("rules file", re.compile(LEAD + r"Contents of .*CLAUDE\.md"), "next message"),
 ]
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 SECRETS = [
@@ -48,7 +48,9 @@ def block_end(lines, i, how):
             continue
         if how == "next heading" and HEADING.match(lines[j]):
             return j
-        if how == "next message" and MESSAGE_START.match(lines[j]):
+        # A reply, or a prompt after a blank line: a quoted line inside a rules file or skill does not end it.
+        if how == "next message" and (lines[j].startswith("\u23fa") or
+                                      (lines[j].startswith("> ") and not lines[j - 1].strip())):
             return j
         if how == "end of list" and not lines[j].strip() and any(l.startswith("- ") for l in lines[i:j]):
             return j + 1
@@ -124,12 +126,23 @@ def replace(pattern, text, kind, placeholder, changes):
     return pattern.sub(swap, text)
 
 
-def scrub(text, paths):
-    """Passes 1-4. Returns (scrubbed text, [(line, kind, placeholder)])."""
-    text, changes = cut_blocks(text)
+def replace_paths(text, paths, changes):
     for literal, placeholder in paths:
         pattern = re.compile(r"(?<![A-Za-z0-9_.-])" + re.escape(literal) + r"(?![A-Za-z0-9_])")
         text = replace(pattern, text, "path", placeholder, changes)
+    return text
+
+
+def with_path_forms(entries, paths):
+    """Each list entry, plus its form after pass 2 (an entry written as a home path reads `~/...` in the
+    scrubbed log), as alternatives under the entry's own number."""
+    return [(e, replace_paths(e, paths, [])) for e in entries]
+
+
+def scrub(text, paths):
+    """Passes 1-4. Returns (scrubbed text, [(line, kind, placeholder)])."""
+    text, changes = cut_blocks(text)
+    text = replace_paths(text, paths, changes)
     text = replace(EMAIL, text, "email", "<email>", changes)
     for kind, pattern in SECRETS:
         text = replace(pattern, text, kind, "<%s>" % kind, changes)
@@ -162,17 +175,24 @@ def list_hits(text, patterns, username):
     hits, user_lines = set(), {}
     for space in (" ", ""):
         flat, lines = flatten(text, space)
-        for n, pattern in enumerate(patterns, 1):
-            p = space.join(pattern.lower().split())
-            if not p:
-                continue  # a blank line in the list keeps its number but matches nothing
-            for m in re.finditer(re.escape(p), flat):
-                line = lines[m.start()]
-                if p == space.join(username.lower().split()):
-                    user_lines.setdefault(line, flat[max(0, m.start() - 20):m.end() + 20])
-                else:
-                    hits.add((line, n))
+        for n, forms in enumerate(patterns, 1):
+            for p in {space.join(f.lower().split()) for f in ((forms,) if isinstance(forms, str) else forms)}:
+                hits.update(match(p, flat, lines, n, space.join(username.lower().split()), user_lines))
     return sorted(hits), sorted(user_lines.items())
+
+
+def match(p, flat, lines, n, user, user_lines):
+    """(line, entry number) for each place p is in flat; the username's places go to user_lines instead."""
+    found = set()
+    if not p or p in ("~", ".", "<tmp>", "<repo-folder>"):
+        return found  # a blank entry, or one that was only a machine path
+    for m in re.finditer(re.escape(p), flat):
+        line = lines[m.start()]
+        if p == user:
+            user_lines.setdefault(line, flat[max(0, m.start() - 20):m.end() + 20])
+        else:
+            found.add((line, n))
+    return found
 
 
 def read(path):
@@ -181,8 +201,14 @@ def read(path):
 
 
 def read_list(path):
-    """List entries, numbered by their line in the list file; blank lines and # comments skipped."""
-    return [l.strip() if l.strip() and not l.strip().startswith("#") else "" for l in read(path).split("\n")]
+    """List entries, numbered by their line in the list file (blank lines keep their number, match nothing).
+    Every other line is an entry, even one starting with #. An empty list is refused: it would pass anything."""
+    with open(path, encoding="utf-8-sig", errors="replace") as f:
+        entries = [l.strip() for l in f.read().split("\n")]
+    if not any(entries):
+        print("stop: the private list %s has no entries" % path, file=sys.stderr)
+        sys.exit(2)
+    return entries
 
 
 def hit_lines(name, hits, user_hits):
@@ -216,8 +242,10 @@ def main(argv):
     temps = [os.environ.get("TMPDIR", ""), tempfile.gettempdir(), os.path.realpath(tempfile.gettempdir()),
              "/private/var/folders", "/var/folders", "/private/tmp", "/tmp"]
     repo = os.path.dirname(os.path.abspath(__file__))
-    text, changes = scrub(read(export), machine_paths(repo, os.path.expanduser("~"), temps))
-    hits, users = hit_lines("scrubbed", *list_hits(text, read_list(private_list), user))
+    paths = machine_paths(repo, os.path.expanduser("~"), temps)
+    entries = read_list(private_list)
+    text, changes = scrub(read(export), paths)
+    hits, users = hit_lines("scrubbed", *list_hits(text, with_path_forms(entries, paths), user))
     counts = {}
     for _, kind, _ in changes:
         counts[kind] = counts.get(kind, 0) + 1

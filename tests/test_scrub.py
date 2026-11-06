@@ -49,6 +49,7 @@ The following skills are available for use with the Skill tool:
 Kept after the skills list.
 Base directory for this skill: /Users/alex/.claude/skills/build
 The recipe's own text, naming Acme Widgets.
+
 > next prompt stays
 SessionStart:startup hook success: # Workspace map
 cwd: /Users/alex/Developer/demo-repo
@@ -120,6 +121,19 @@ class ScrubTests(unittest.TestCase):
             with self.subTest(text=text):
                 self.assertTrue(scrub.list_hits(text, PATTERNS, USER)[0])
 
+    def test_loaded_text_runs_past_a_quoted_line_and_indented_markers_are_cut(self):
+        text = ("Contents of /Users/alex/.claude/CLAUDE.md:\n# rules\n> quoted rule\nAcme Widgets rule\n\n> next prompt\n"
+                "  \u23bf  Base directory for this skill: x\nsecret-project body\n\u23fa reply\n")
+        out, _ = scrub.scrub(text, PATHS)
+        self.assertEqual(scrub.list_hits(out, PATTERNS, USER)[0], [], out)
+        self.assertIn("> next prompt", out)
+        self.assertIn("\u23fa reply", out)
+
+    def test_a_list_entry_written_as_a_path_still_matches(self):
+        out, _ = scrub.scrub("see /Users/alex/Documents/Old Shoebox/Zephyr/plan.md\n", PATHS)
+        entries = ["/Users/alex/Documents/Old Shoebox/Zephyr"]
+        self.assertTrue(scrub.list_hits(out, scrub.with_path_forms(entries, PATHS), USER)[0])
+
     def test_list_match_ignores_case(self):
         hits, _ = scrub.list_hits("SECRET-PROJECT\n", PATTERNS, USER)
         self.assertTrue(hits)
@@ -131,7 +145,7 @@ class CommandTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.dir = self.tmp.name
-        self.list = self.path("list.txt", "# made-up list\nAcme Widgets\n%s\n" % getpass.getuser())
+        self.list = self.path("list.txt", "Acme Widgets\n%s\n" % getpass.getuser())
         self.report = os.path.join(self.dir, "report.txt")
         self.out = os.path.join(self.dir, "out.txt")
 
@@ -172,6 +186,21 @@ class CommandTests(unittest.TestCase):
         self.path("log.txt", "now with Acme Widgets\n")
         self.assertNotEqual(run(log, self.out, self.list, self.report).returncode, 0)
         self.assertFalse(os.path.exists(self.out))
+
+    def test_an_empty_list_is_refused(self):
+        log = self.path("log.txt", "text\n")
+        for text in ["", "\n  \n"]:
+            with self.subTest(text=text):
+                empty = self.path("empty.txt", text)
+                self.assertEqual(run(log, self.out, empty, self.report).returncode, 2)
+                self.assertEqual(run("--check-only", empty, self.report, log).returncode, 2)
+
+    def test_hash_entries_and_a_byte_order_mark_still_match(self):
+        log = self.path("log.txt", "notes on #acme widgets\n")
+        for text in ["#Acme Widgets\n", "\ufeffAcme Widgets\n"]:
+            with self.subTest(text=text):
+                listed = self.path("l.txt", text)
+                self.assertEqual(run(log, self.out, listed, self.report).returncode, 1)
 
     def test_check_only_over_many_files(self):
         a = self.path("a.txt", "clean\n")

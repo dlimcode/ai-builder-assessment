@@ -102,6 +102,15 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   files, not history, so a hit in history needs the branch rewritten before any push. That is Danish's call
 - Commit: the wave-1 fix commit after this entry
 
+## 01:56 Scrub wave 2: path-shaped list entries, empty lists, quoted lines in loaded text
+- Agent did: fixed task-7-review-1 F4 (list entries also matched in their `~/...` form), F5 (list read as
+  utf-8-sig, every non-blank line an entry, an empty list refused with exit 2) and F7 (markers may follow an indent
+  or the export's tree glyphs; loaded text ends at a reply, or at a `> ` prompt after a blank line)
+- Helped / failed: helped; one new test was wrong at first (it expected `#Acme Widgets` to match text without the
+  `#`), corrected to match the entry as written
+- Corrected by: the agent, on reading the failure
+- Commit: the wave-2 fix commit after this entry
+
 ## Lows
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened
   (patch `open`), a permission-denied file as "file missing"
