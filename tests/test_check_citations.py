@@ -123,6 +123,15 @@ class FindTests(unittest.TestCase):
         self.assertEqual([(r.line, r.path) for r in refs], [(4, "notes.md")])
         self.assertEqual(skipped, 1)
 
+    def test_unclosed_quote_runs_to_the_end_of_the_line(self):
+        r = self.one('a.md:1 "see notes.md:2')
+        self.assertEqual(r.quote, "see notes.md:2")
+        refs, _ = cc.find_refs('notes.md:3 "Under a minute')
+        self.assertEqual(cc.check(refs[0], FIXTURES).verdict, "not in file")
+
+    def test_curly_open_may_close_straight(self):
+        self.assertEqual(self.one('notes.md:3 \u201cunder a minute" then').quote, "under a minute")
+
     def test_line_and_column_is_not_a_reference(self):
         self.assertEqual(cc.find_refs("a.py:3:7"), ([], 0))
 

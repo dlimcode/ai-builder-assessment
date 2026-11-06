@@ -20,7 +20,7 @@ REF_RE = r"(?<!%s)(?P<path>%s+):(?P<a>\d+)(?:-(?P<b>\d+))?" % (PATH_CHARS, PATH_
 TOKEN = re.compile(r"(?P<code>(?P<ticks>`+).+?(?<!`)(?P=ticks)(?!`))|(?P<url>[A-Za-z][A-Za-z0-9+.-]*://\S*)|" + REF_RE)
 SHAPE = re.compile(REF_RE)
 QUOTE_OPEN = re.compile("[ \t]*([\"“])")
-QUOTE_CLOSE = {'"': '"', "“": "”"}
+QUOTE_CLOSE = {'"': re.compile('"'), "“": re.compile('[”"]')}
 FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
 
 
@@ -60,10 +60,11 @@ def scan_line(text, number):
         quote = None
         q = QUOTE_OPEN.match(text, pos)
         if q:
-            close = text.find(QUOTE_CLOSE[q.group(1)], q.end())
-            if close != -1:
-                quote = text[q.end():close]
-                pos = close + 1  # words inside a quote are not scanned for references
+            # An unclosed quote runs to the end of the line: still checked, never a silent "line only".
+            close = QUOTE_CLOSE[q.group(1)].search(text, q.end())
+            end = close.start() if close else len(text)
+            quote = text[q.end():end]
+            pos = close.end() if close else end  # words inside a quote are not scanned for references
         refs.append(Ref(number, m.group("path"), line_number(a), line_number(b), quote, text[m.start():pos]))
 
 
