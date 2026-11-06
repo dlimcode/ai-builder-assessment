@@ -71,7 +71,8 @@ line breaks removed [record planning/04-devils-advocate.md:23 "Pass 5 also searc
 `scrub.py --check-only <private-list> <report-out> FILE...` runs pass 5 alone over many files. `planning/finish-sitting.sh
 <private-list>` makes a temp folder (`mktemp -d "$TMPDIR/scrub.XXXXXX"`), scrubs `logs/raw/session.txt` into
 `logs/session.txt`, then checks every `git ls-files` file and `git log --format=%B main..HEAD`; reports stay in the
-temp folder. Tests on a made-up log only. Per-commit review: yes.
+temp folder. Tests on a made-up log only, holding one of each of the six start-up blocks a saved session file was
+measured to carry (listed under What nobody could show); if `/export` fails, scrub the saved session file instead. Per-commit review: yes.
 **Done-check:** `timeout 60 python3 -m unittest tests.test_scrub 2>&1 | tail -1` prints `OK`; `bash -n planning/finish-sitting.sh && echo ok` prints `ok`.
 ### Task 8: README.md (15 min)
 03 section 5's seven headings; first line from 04 [record planning/04-devils-advocate.md:35 "words an AI report quotes are really on the file line it cites"].
@@ -127,11 +128,11 @@ Checker (tasks 1-6) 115; writing and logs (7, 8, 9, 12, 13) 70 [assumed, added b
 
 | Gap | What closes it |
 |---|---|
-| Tests (i) and (ii) not run [measured, lead: no results file, 00:56] | Card 1; task 0 covers (ii)'s shell half |
+| Test (ii), shell half: run 01:16, a fenced `cat` was BLOCKED on both targets in both fenced runs (READ in the control), but the block came from Danish's automatic permission check, not provably from the deny rule or the sandbox [measured, Danish's test script, 7 Nov 01:16] | Task 0's shell canary, in the real sitting |
 | `/build` loading through its symlink under the fence [record planning/04-devils-advocate.md:108 "loads through the symlink under the block"] | Task 0 dry run |
 | Subagents inheriting `--settings` [record planning/04-devils-advocate.md:109 "Whether subagents inherit"] | Task 0: the subagent canary read |
 | The sandbox starting at the desk; nested runs failed [record planning/02-demo-input-and-logs.md:99 "enabled but failed to initialize"] | Task 0: the shell canary `cat` |
-| Whether `/export` carries the recipe's text [record planning/02-demo-input-and-logs.md:125-126 "Final marker list comes from test (i)"] | Card 1, or the real export's pass-1 counts and Danish's full read |
+| Test (i): `/export` does not run in print mode ("isn't available in this environment"), so what it carries is still unknown; the saved session file carries every start-up block: the sandbox text, the skills list, the loaded recipe's own text, start-up hook output, the global rules file, and the home path 7 times [measured, Danish's test script, 7 Nov 01:16, counts only] | Task 7's pass 1 cuts all of these; task 13's pass-1 counts and Danish's full read |
 | Wrapped paths escaping the scrub [record planning/02-demo-input-and-logs.md:147 "text split across lines by terminal wrapping"] | Pass 5 on joined text (task 7); Danish's read |
 | A fresh report going red with no edit [record planning/03-plan.md:66 "It likely shows all green"] | Task 9's reviews run |
 | The recipe reading `### Task 0:` and these minutes | The sitting itself; log in decisions |
@@ -143,7 +144,7 @@ Checker (tasks 1-6) 115; writing and logs (7, 8, 9, 12, 13) 70 [assumed, added b
 **Where it comes from:** not run [measured, lead, 00:56]; [record planning/04-devils-advocate.md:23 "Test (i) must invoke"].
 **Your options:** (a) run it first, about 5 min [assumed]; nothing to undo. (b) skip: task 0 covers test (ii), the real export answers test (i) after the sitting; undone by running it any time before a push.
 **My pick and the case against it:** (a): task 7 then cuts the right blocks with an agent at hand. Against: it edits a script outside this repo and costs minutes the dry run half covers.
-**Your answer:** `test script: run first` or `test script: skip`
+**Your answer:** `test script: run first` or `test script: skip`. Answered 7 Nov ~01:10: "run first" [Danish]; run 01:16.
 
 **Card 2: Keep `.claude/settings.json` out of git**
 **What it is:** whether the repo's Claude Code settings (one line, the commit co-author) go public with the repo.
