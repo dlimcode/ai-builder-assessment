@@ -2,19 +2,15 @@ Last confirmed: 2026-11-07
 
 # State: the citation checker sitting
 
-**Where it stands:** the build is done on `build/check-citations` (tasks 0-12): the checker, the scrub, the README,
-the demo script, every review saved in `planning/reviews/`, and `planning/unit-report.md`. Not merged, not pushed.
+**Where it stands:** built, scrubbed and merged into `main` (fast-forward, local) on Danish's yes, 7 Nov. Not pushed,
+not public. `logs/session.txt` is committed; the three backup refs and `.review/` are deleted.
 
 ## Waits on Danish
-- **Task 13, the log:** the sitting's export is in `logs/raw/session.txt` (done). In a terminal at the repo root
-  `bash planning/finish-sitting.sh <private-list>`, read both reports and `logs/session.txt` in full, and commit
-  `logs/session.txt` if clean. The fix session's own log is not exported.
-- **Backup refs:** `refs/original/refs/heads/build/check-citations` (the first rewrite, old folder name),
-  `refs/backup/home-path/build/check-citations` (19c672c, the home path),
-  `refs/backup/folder-name/refs/heads/build/check-citations` (9beb3d5, the fix commits with a folder name), and the
-  reflog; deleted only on his word (`refs: delete`).
-- **The merge (task 14):** `yes` under `question:` in `planning/build-brief.md`, then start a session from it.
-- **His calls listed as cards in `planning/unit-report.md`.**
+- **Card 4, the author email:** every commit carries his webmail address; keep it, or rewrite to the noreply address
+  (every commit, main's too) before any push.
+- **The reflog:** it still points at the old commits that held the home path and the folder names; local only, gone
+  after `git reflog expire --expire=now --all && git gc --prune=now`, on his word.
+- **Not in this sitting:** pushing, making the repo public, recording the demo.
 
 ## Done this sitting
 - Tests: 63, all pass; the golden set came before any checker code.
@@ -23,4 +19,6 @@ the demo script, every review saved in `planning/reviews/`, and `planning/unit-r
   reports hits wholly inside the build's own text instead of failing the export (2c988d0, then a214578
   and de9333b after its review and recheck: `planning/reviews/fix-2-*.md`). de9333b is not rechecked,
   on his word. A folder name from the sandbox settings left those commits by a rewrite (decisions 03:26).
+- Task 13: Danish ran finish-sitting.sh, read and accepted its remaining hits; it still exits 1 on them
+  (decisions 03:30, README weakest part). Task 14: merged.
 - Known small gaps: `planning/decisions.md`, `## Lows`.

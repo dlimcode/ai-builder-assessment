@@ -307,7 +307,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   pattern and the temp folder. He accepted all of them, so finish-sitting.sh still exits 1 on them (README,
   weakest part). A grep of the log: no home path, no email, no username, no key (`ghp_` only as a named prefix)
 - Corrected by: Danish's word: scrub.py is not changed again
-- Commit: the commit after this entry
+- Commit: 75476d2; the log in 5829fbc
 
 ## Lows
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened

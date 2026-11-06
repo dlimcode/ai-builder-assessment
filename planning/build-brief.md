@@ -4,6 +4,7 @@ branch: build/check-citations
 status: blocked-on-human
 question: |
   What: merge build/check-citations into main, once the checks pass and the logs are scrubbed?
+  yes
 ---
 
 # Build brief: a citation checker for agent-written reports
