@@ -279,13 +279,15 @@ def spaced(literal):
     return r"\s*".join(re.escape(c) for c in literal)
 
 
-# Text the build itself puts in the export: made-up test paths, a bare ~/Documents (no folder after it, even past a
-# line break), the scrub's own email pattern and the harness temp folder. A list hit wholly inside one of these
-# places is reported, not failed; a hit that runs past one, or a longer word that starts with one, is still failed.
+# Text the build itself puts in the export: made-up test paths, a bare ~/Documents (no folder after it), the scrub's
+# own email pattern and the harness temp folder. A list hit wholly inside one of these places is reported, not failed;
+# a hit that runs past one, or a longer ASCII word that starts with one, is still failed.
 GENERIC_TEXT = re.compile("|".join([spaced(s) + r"(?![A-Za-z0-9])" for s in (
     "/Users/alex", "-Users-alex", "/Users/someone", "~/Documents/Old Shoebox", "@example.com",
     r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", "claude-501", "../claude-501x")]
-    + [spaced("~/Documents") + r"(?:/(?!\s*[\w.-])|(?!\s*/)(?![\w.-]))"]),
+    # Bare ~/Documents, by what may follow it: after a slash only a closing mark (not before a word or slash) or the
+    # end; with no slash, a closing mark, punctuation, a space not before a slash, or the end. Anything else fails.
+    + [spaced("~/Documents") + r"(?:/(?=[`'\")\]](?![\w/])|\s*\Z)|(?=[`'\")\],;:!?]|\.(?!\S)|\s(?!\s*/)|\Z))"]),
     re.IGNORECASE)  # the list matches any case, so its generic text must too
 
 

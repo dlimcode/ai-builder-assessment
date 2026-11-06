@@ -261,6 +261,18 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   whitespace too. The cost, on the safe side: `~/Documents/` at a line end before any word now fails. The
   reviewer's ten failure paths are in the test, red on 6be8f92. `../claude-501x` (a made-up folder in
   task-4-review-1) is listed, since the boundary now fails it. Stand-in list run on the real export: written, 0 hits
+- Commit: 5fec6ee
+
+## 03:13 The fix's recheck: a folder starting with a quote or symbol still passed
+- Agent did: in 5fec6ee wrote the bare `~/Documents` rule as what may not follow it (a letter, digit, `_`, `.`, `-`)
+- Helped / failed: the recheck helped (F1 Medium, F2 Low: planning/reviews/fix-2-recheck-1.md); it confirmed the
+  review's F1 and F2 fixed. `~/Documents/"Client Files"/x` passed, as did `(Old)`, `#Inbox`, an emoji. It also
+  found the 03:06 entry overstates: the test took 7 of the review's inputs, not ten (the recheck ran the rest:
+  all fail now)
+- Corrected by: the rule now lists what may follow: after the slash only a closing mark not before a word or
+  slash, or the end; with no slash, a closing mark, punctuation, a space not before a slash, or the end. Four
+  recheck inputs are in the test, red on 5fec6ee. Stand-in list run on the real export: written, 0 hits. Not
+  rechecked: the recipe allows one recheck a fix; a second waits for Danish's word. F2 Low is under Lows
 - Commit: the commit after this entry
 
 ## 02:59 This fix session's log is not exported
@@ -336,3 +348,5 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - unit-rereview-recheck-1 F3, `tests/test_scrub.py:202`: the unescape and the half-rule have no test of their own
 - unit-rereview-recheck-1 F4, `scrub.py:22`: a `>` prompt that starts with the tag in prose cuts the rest of the log
   (safe; shown in the block count)
+- fix-2-recheck-1 F2, `scrub.py:285`: a phrase's end check is ASCII only and stops at a line break, so entry `Alex`
+  passes as generic in `/Users/alex-tan/x` or `/Users/alex\nandra` (only entries inside a made-up phrase)

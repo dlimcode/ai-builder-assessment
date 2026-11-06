@@ -291,7 +291,7 @@ class CommandTests(unittest.TestCase):
         listed = self.path("g.txt", "/Users/someone\n%s/Documents\n@example.com\nclaude-501\nAcme Widgets\nAlexandra\n"
                            "%s/Documents/Clients\n" % (home, home))
         log = self.path("log.txt", "test path /Users/someone/x, /USERS/someone/y and -Users-alex\n"
-                        "read ~/Documents, then `~/Documents/`\nthe pattern \"@example.com\" and "
+                        "read ~/Documents, then `~/Documents/`, '~/Documents' and ~/Documents was\nthe pattern \"@example.com\" and "
                         "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\ntemp <tmp>/cl\naude-501/x\n")
         res = run(log, self.out, listed, self.report)
         self.assertEqual(res.returncode, 0, res.stderr)
@@ -305,7 +305,9 @@ class CommandTests(unittest.TestCase):
         # ~/Documents (also past a line break or a space), a listed word after one, a name starting /Users/alex.
         for text in ["see ~/Documents/Zephyr\n", "~/Documents Acme Widgets\n", "-Users-alex/Acme Widgets\n",
                      "see ~/Documents/\nClients/notes\n", "see ~/Documents\n/Clients\n", "see ~/Documents/ Clients\n",
-                     "cd /Users/alexandra/work\n", "-Users-alexandra-work\n", "/Users/alex\nandra\n", "claude-5017\n"]:
+                     "cd /Users/alexandra/work\n", "-Users-alexandra-work\n", "/Users/alex\nandra\n", "claude-5017\n",
+                     'cd ~/Documents/"Client Files"/x\n', "~/Documents/(Old) Clients/x\n", "~/Documents/#Inbox/x\n",
+                     "see ~/Documents/\n(Old) Clients\n"]:
             with self.subTest(text=text):
                 self.assertEqual(run(self.path("d.txt", text), self.out, listed, self.report).returncode, 1)
 
