@@ -1,5 +1,6 @@
 """Tests for scrub.py, on a made-up log and a made-up three-line private list only."""
 import getpass
+import json
 import os
 import shutil
 import subprocess
@@ -152,6 +153,33 @@ class ScrubTests(unittest.TestCase):
                             ("Vela", "we have lazy loading")]:
             with self.subTest(entry=entry):
                 self.assertEqual(scrub.list_hits(text, [entry], USER)[0], [])
+
+    def test_a_saved_session_file_is_read_as_records(self):
+        records = [
+            {"type": "user", "message": {"content": "<system-reminder>\nAcme Widgets rules\n</system-reminder>"}},
+            {"type": "user", "message": {"content": [{"type": "text",
+                                                      "text": "Base directory for this skill: x\nsecret-project steps"}]}},
+            {"type": "assistant", "message": {"content": [{"type": "tool_use", "input": {"content": "about Acme\nWidgets"}}]}},
+            {"type": "assistant", "message": {"content": [{"type": "text", "text": "a reply kept"}]}},
+        ]
+        text = "\n".join(json.dumps(r) for r in records) + "\n"
+        out, _ = scrub.scrub(text, PATHS)
+        self.assertIn("a reply kept", out)
+        self.assertNotIn("secret-project", out)
+        self.assertEqual([n for _, n in scrub.list_hits(out, PATTERNS, USER)[0]], [1])
+
+    def test_indented_list_and_sandbox_end_where_they_should(self):
+        text = ("  The following skills are available:\n\n  - design: x\n  - meeting: y\n\nkept one\n"
+                "  ## Bash command sandbox\n  secret-project rules\n  ## Next\nkept two\n")
+        out, _ = scrub.scrub(text, PATHS)
+        self.assertIn("kept one", out)
+        self.assertIn("kept two", out)
+        self.assertNotIn("secret-project", out)
+
+    def test_a_folder_entry_with_a_slash_matches_the_bare_folder(self):
+        entries = scrub.read_list_text("/Users/alex/Documents/Old Shoebox/Zephyr/\n")
+        out, _ = scrub.scrub("ls /Users/alex/Documents/Old Shoebox/Zephyr\n", PATHS)
+        self.assertTrue(scrub.list_hits(out, scrub.with_path_forms(entries, PATHS), USER)[0])
 
     def test_list_match_ignores_case(self):
         hits, _ = scrub.list_hits("SECRET-PROJECT\n", PATTERNS, USER)
@@ -308,6 +336,20 @@ class FinishSittingTests(unittest.TestCase):
         res = self.finish()
         self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
         self.assertIn("generic", res.stdout)
+
+    def test_a_word_only_in_mains_history_is_caught(self):
+        self.git("switch", "-q", "main")
+        notes = os.path.join(self.repo, "old.md")
+        with open(notes, "w", encoding="utf-8") as f:
+            f.write("plan for Zephyr Holdings\n")
+        self.git("add", "old.md")
+        self.git("commit", "-q", "-m", "add")
+        self.git("rm", "-q", "old.md")
+        self.git("commit", "-q", "-m", "remove")
+        self.git("switch", "-q", "build")
+        self.git("rebase", "-q", "main")
+        res = self.finish()
+        self.assertNotEqual(res.returncode, 0, res.stdout + res.stderr)
 
     def test_clean_branch_passes(self):
         res = self.finish()

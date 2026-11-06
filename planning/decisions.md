@@ -165,6 +165,16 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   still fails. Two tests (check-only, and finish-sitting in a throwaway repo)
 - Commit: the commit after this entry
 
+## 02:18 Unit-end scrub review: the saved session file, indented blocks, slashes, main's history
+- Agent did: built the scrub for the `/export` text only, with block ends that assumed unindented lists and headings
+- Helped / failed: the review helped (1 High, 6 Medium, 3 Low, 2 questions: planning/reviews/unit-review-scrub.md);
+  its F3 and F4 were already fixed by cc51f43 (its probes rerun on the head: nothing cut wrongly, the recipe cut)
+- Corrected by: F1 a file of JSON records (the saved session file, the fallback if `/export` fails) is read as its
+  records' strings, each after a reply mark, so markers start lines and escaped line breaks are real; F2 lists and
+  headings may be indented, in one pass (was quadratic); F5 a list entry's trailing `/` is dropped; F6 the history
+  check covers every commit from HEAD, main's too, without author lines (also answers recheck F3a). F7 is next
+- Commit: the fix commit after this entry
+
 ## Lows
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened
   (patch `open`), a permission-denied file as "file missing"
@@ -211,3 +221,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   holds his commit name or email, every branch fails. Danish's call
 - task-7-recheck-1 (note): an indented `SessionStart` or `Contents of ... CLAUDE.md` inside a reply now cuts the
   rest of that reply (safe, loses text)
+- unit-review-scrub F8, `planning/finish-sitting.sh:10`: a relative list path breaks after `cd`, with misleading messages
+- unit-review-scrub F9, `scrub.py` EMAIL: quadratic on a long run with no `@` (100k hex characters: 13.6 s)
+- unit-review-scrub F10, `scrub.py` main: path forms of list entries are tested only directly, not through the command
+- unit-review-scrub questions: box-drawing characters between wrapped words; staged content not checked

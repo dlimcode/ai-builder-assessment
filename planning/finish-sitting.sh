@@ -1,5 +1,5 @@
-# Scrubs the exported session log and checks every tracked file and every branch commit message against
-# Danish's private word list. Run by Danish after the session ends, never by the agent:
+# Scrubs the exported session log and checks every tracked file and every commit (message and diff, main's
+# too) against Danish's private word list; hits of the generic entries listed in scrub.py are reported, not failed. Run by Danish after the session ends, never by the agent:
 #   bash planning/finish-sitting.sh <private-list>
 # The private list must live outside the repo; the two reports stay in a temp folder outside it too.
 # Writes logs/session.txt only when the scrub finds no private-list hit. Commits and pushes nothing.
@@ -13,15 +13,15 @@ list_dir=$(cd "$(dirname "$list")" && pwd) || exit 1
 case "$list_dir/" in "$repo"/*) echo "stop: the private list must live outside the repo"; exit 1 ;; esac
 cd "$repo"
 [ -f logs/raw/session.txt ] || { echo "stop: no logs/raw/session.txt; in the session: /export logs/raw/session.txt"; exit 1; }
-git rev-parse --verify -q main >/dev/null || { echo "stop: no main branch to compare commit messages against"; exit 1; }
 
 tmp=$(mktemp -d "${TMPDIR:-/tmp}/scrub.XXXXXX") || exit 1
 
 export_hit=0; repo_hit=0
 python3 scrub.py logs/raw/session.txt logs/session.txt "$list" "$tmp/scrub-report.txt" || export_hit=1
 
-# Every branch commit, message and diff: a word a later commit removed is still in history.
-git log -p main..HEAD > "$tmp/branch-history.txt"
+# Every commit's message and diff, main's too (nothing is pushed yet, so all of it goes public): a word a later
+# commit removed is still in history. Author lines are left out.
+git log -p --format=%B HEAD > "$tmp/branch-history.txt"
 git ls-files -z > "$tmp/files"
 set -- "$tmp/branch-history.txt"
 while IFS= read -r -d '' f; do

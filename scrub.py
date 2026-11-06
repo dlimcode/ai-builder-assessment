@@ -9,6 +9,7 @@ report stay outside the repo. Exit 0 clean; 1 a private-list hit, and the scrubb
 """
 import bisect
 import getpass
+import json
 import os
 import re
 import sys
@@ -44,17 +45,19 @@ def block_end(lines, i, how):
     """Index of the first line after the block that starts at lines[i]."""
     if how == "this line":
         return i + 1
-    for j in range(i, len(lines)):
-        if j == i:
-            continue
-        if how == "next heading" and HEADING.match(lines[j]):
+    seen_item = False
+    for j in range(i + 1, len(lines)):
+        if how == "next heading" and HEADING.match(lines[j].lstrip()):
             return j
         # Only a reply ends it: a quoted line inside a rules file or skill looks like a prompt. The prompt after
         # the loaded text is cut with it, which is safe.
         if how == "next message" and lines[j].startswith("\u23fa"):
             return j
-        if how == "end of list" and not lines[j].strip() and any(l.startswith("- ") for l in lines[i:j]):
-            return j + 1
+        if how == "end of list":
+            if lines[j].lstrip().startswith("- "):
+                seen_item = True
+            elif seen_item and not lines[j].strip():
+                return j + 1
     return len(lines)
 
 
@@ -143,9 +146,34 @@ def with_path_forms(entries, paths):
     return [(e, replace_paths(e, paths, [])) for e in entries]
 
 
+def records_text(text):
+    """A saved session file holds one JSON record per line, with line breaks escaped inside strings, so no marker
+    starts a line. Each record becomes its strings, one after another, after a reply mark that ends any block
+    cut from the record before. Any other text is returned as it is."""
+    lines = [l for l in text.split("\n") if l.strip()]
+    try:
+        records = [json.loads(l) for l in lines]
+    except ValueError:
+        return text
+    if not records or not all(isinstance(r, dict) for r in records):
+        return text
+
+    def strings(v):
+        if isinstance(v, str):
+            yield v
+        elif isinstance(v, dict):
+            for x in v.values():
+                yield from strings(x)
+        elif isinstance(v, list):
+            for x in v:
+                yield from strings(x)
+
+    return "".join("\u23fa record %d\n%s\n" % (n, "\n".join(strings(r))) for n, r in enumerate(records, 1))
+
+
 def scrub(text, paths):
     """Passes 1-4. Returns (scrubbed text, [(line, kind, placeholder)])."""
-    text, changes = cut_blocks(text)
+    text, changes = cut_blocks(records_text(text))
     text = replace_paths(text, paths, changes)
     text = replace(EMAIL, text, "email", "<email>", changes)
     for kind, pattern in SECRETS:
@@ -206,11 +234,16 @@ def read(path):
         return f.read()
 
 
+def read_list_text(text):
+    """List entries, numbered by their line (blank lines keep their number, match nothing). Every other line is an
+    entry, even one starting with #; a trailing / is dropped so a folder entry also matches the bare folder."""
+    return [l.strip().rstrip("/") if l.strip() != "/" else "" for l in text.split("\n")]
+
+
 def read_list(path):
-    """List entries, numbered by their line in the list file (blank lines keep their number, match nothing).
-    Every other line is an entry, even one starting with #. An empty list is refused: it would pass anything."""
+    """The list file's entries. An empty list is refused: it would pass anything."""
     with open(path, encoding="utf-8-sig", errors="replace") as f:
-        entries = [l.strip() for l in f.read().split("\n")]
+        entries = read_list_text(f.read())
     if not any(entries):
         print("stop: the private list %s has no entries" % path, file=sys.stderr)
         sys.exit(2)
