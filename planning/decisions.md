@@ -226,6 +226,17 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Corrected by: none
 - Commit: ee37a87
 
+## 02:56 Fix session: the home path was in three commands of the last commit
+- Agent did: wrote the commands in `planning/STATE.md` and the unit report's cards 1 and 5 with the home folder's
+  full path, following the recipe's "absolute path" rule over the brief's "no absolute paths in committed files"
+- Helped / failed: failed; Danish found it. It was only in the head commit (three lines), so that commit was
+  amended with repo-relative commands (`bash planning/finish-sitting.sh`, run at the repo root; both scripts find
+  the repo from their own location). Old to new: 19c672c -> 224cf86; no file or message cited 19c672c. The history
+  check (`git log -p --format=%B main HEAD`) now finds the home path 0 times
+- Corrected by: Danish. The old commit is kept under `refs/backup/home-path/build/check-citations`, beside the
+  earlier `refs/original/...` backup, until he says to delete them
+- Commit: 224cf86 (amended)
+
 ## Lows
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened
   (patch `open`), a permission-denied file as "file missing"
