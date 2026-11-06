@@ -111,6 +111,26 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Corrected by: the agent, on reading the failure
 - Commit: the wave-2 fix commit after this entry
 
+## 01:57 Unit-end checker review: the demo script made 2 unexplained reds
+- Agent did: wrapped a backticked example in `planning/demo-script.md` across two lines; the checker scans line by
+  line, paired the ticks wrongly, and checked `notes.md:3` and `/etc/hosts:1` from the repo root (2 new reds)
+- Helped / failed: the review helped (1 Medium, 5 Lows, 1 question: planning/reviews/unit-review-checker.md)
+- Corrected by: the reviewer's pick: the demo lines rewrapped so each code span sits on one line; README now says a
+  code span is skipped only on one line, and names wrapped inline code and paths with spaces under "What was cut".
+  The dog-food run is back to 19 reds, the ones explained at 01:39. The parser limit stays (noisy, never a false green)
+- Commit: the fix commit after this entry
+
+## 01:59 Unit-end docs review: the README claimed what had not happened yet
+- Agent did: wrote README's "How it was built" as if the unit end and the log export were done, and said each
+  Medium had its own fix commit (the scrub waves fix several in one)
+- Helped / failed: the review helped (2 Medium, one shared with the checker review; 7 Lows; 2 questions:
+  planning/reviews/unit-review-docs.md). Its Q2 checked: main's 4699865 records the 01:16 test script, not task 0's
+  dry run, so the dry-run answers are still missing
+- Corrected by: the section now says only what is true at merge time: reviews and rechecks as done, fixes may
+  share a commit, decisions written during the sitting with three corrected times, and the log present only if
+  the scrub after the session was clean
+- Commit: the fix commit after this entry
+
 ## Lows
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened
   (patch `open`), a permission-denied file as "file missing"
@@ -134,3 +154,17 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - task-7-review-1 F9, `scrub.py` SECRETS: a private key with no END line, lower-case `bearer`, a dash-written MAC
 - task-7-review-1 F10, `scrub.py` `read`: a non-UTF-8 export or list is read with replacement characters, so
   matches can silently fail
+- unit-review-checker F2, `check_citations.py:102`: no test pins `isfile` (a FIFO would hang `open`); only ESC is
+  tested among control characters
+- unit-review-checker F3, `check_citations.py:161-170`: usage errors print the report name and `--root` unfiltered
+- unit-review-checker F4, `check_citations.py:188`: an output encoding error or a closed pipe exits 1 or 120
+- unit-review-checker F5, `check_citations.py:122`: each reference re-reads its file (1,600 refs on a 20,000-line
+  file: 37 s)
+- unit-review-checker Q1, `check_citations.py:22`: a quote after punctuation (`notes.md:1, "x"`) is never checked and
+  comes out "line only"; 01 says "right after the line number". Danish's call
+- unit-review-docs F4, `planning/demo-script.md:23` and the 01:45 entry: "came out green" for a "line only" result,
+  which README's table calls neutral
+- unit-review-docs F5, `planning/demo-script.md` point 4: 03's "one bug the tests caught" is not in the demo
+- unit-review-docs F6, `README.md:11-17`: the sample output names no command and is not marked as an excerpt
+- unit-review-docs F8, `planning/reviews/`: saved word for word, the replies hold system temp paths (`/tmp/...`,
+  `/private/var`); no home folder or username. The brief bars absolute paths; the recipe saves replies verbatim

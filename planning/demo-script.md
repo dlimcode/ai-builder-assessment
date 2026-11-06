@@ -25,8 +25,9 @@ before recording and update any number that moved.
 
 ## 4. Features and bugs (60 s)
 - The seven verdicts (README's table): `wrong line` lists where the words really are.
-- `python3 check_citations.py tests/fixtures/report.md --root tests/fixtures`: point at row 3 (`wrong line, found at
-  notes.md:3`) and the `/etc/hosts:1` line, `refused: outside root`: an absolute path is never opened.
+- `python3 check_citations.py tests/fixtures/report.md --root tests/fixtures`: point at row 3
+  (`wrong line, found at notes.md:3`) and the `/etc/hosts:1` line, `refused: outside root`: an absolute
+  path is never opened.
 - The reviewers' notes against the final code: `python3 check_citations.py planning/reviews/*.md --root .`
   Measured: 40 references, 0 red, 37 not checked: the reviewers wrapped their citations in backticks, which the
   checker treats as examples. Say so: an honest limit, and the next rule to give reviewers.

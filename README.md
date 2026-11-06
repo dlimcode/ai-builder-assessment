@@ -36,7 +36,7 @@ python3 -m unittest discover -s tests
 
 A reference is `path:line` or `path:first-last`, optionally inside `[record ...]`, optionally followed on the same
 line by a quote in straight or curly marks. A path is letters, digits and `_ . / -` holding a `.` or `/`, so `12:30`
-is not one. Anything in backticks, code fences or URLs is skipped and counted "not checked".
+is not one. Anything in backticks (on one line), code fences or URLs is skipped and counted "not checked".
 
 | Verdict | Colour | When |
 |---|---|---|
@@ -67,7 +67,9 @@ The match rule, in four lines:
 
 ## What was cut
 
-- `path:line:col`, `#L12` anchors, paths with spaces, and URLs (skipped, not checked).
+- URLs (skipped, counted "not checked"); `path:line:col` and `#L12` anchors (dropped, not counted).
+- Paths with spaces: the part after the last space is taken as the path, so `my notes.md:1` checks `notes.md`.
+- Inline code that wraps onto the next line: the backticks pair up wrongly, and the examples in it are checked.
 - `...` inside a quote: taken literally, so a shortened quote is red, and the line says "`...` is not supported".
 - Fuzzy or case-blind matching, a near-line tolerance, an "also at" note when a green quote repeats.
 - Folder arguments (walking a tree), JSON output, a package or CI, any model call at run time.
@@ -87,12 +89,15 @@ more lines and cited at the wrong place come out "not in file").
   `planning/00-04*.md`; `planning/README.md` is the task list the sitting followed.
 - **Tests before code:** the 33-row golden set and its fixtures were committed before `check_citations.py` existed
   (`git log --reverse --oneline`).
-- **Review:** a fresh reviewer agent read the commits for tasks 2, 4 and 7, and three more read the branch at the
-  end; their replies are in `planning/reviews/`, and each Medium-or-worse finding has its own `fix` commit.
-- **`planning/decisions.md`:** each moment the agent helped, failed or was corrected, written as it happened.
-- **Logs:** `logs/session.txt` is the session's `/export`, scrubbed by `scrub.py` (start-up blocks, this machine's
-  paths, emails, tokens; then a private word list kept outside the repo), and read in full by a person before any
-  push. If that file is missing, the export or the scrub could not be made clean and this line says so instead.
-  The log cannot show anything after the export: the scrub run itself and the merge.
+- **Review:** a fresh reviewer agent read the commits for tasks 2, 4 and 7, a fresh agent rechecked each fix of a
+  Medium-or-worse finding, and three more read the branch at the end. Their replies are in `planning/reviews/`;
+  the fixes are `fix` commits whose `Fixes:` trailers name the finding (one commit may fix several).
+- **`planning/decisions.md`:** each moment the agent helped, failed or was corrected, written during the sitting;
+  three entry times were guessed and then corrected (its own entry says so). Smaller known gaps are its `## Lows`.
+- **Logs:** the session is exported and scrubbed after it ends, so this README is written before that step.
+  `logs/session.txt`, if present, is the session's `/export` scrubbed by `scrub.py` (start-up blocks, this
+  machine's paths, emails, tokens; then a private word list kept outside the repo) and read in full by a person
+  before any push. If it is absent, the export or the scrub could not be made clean. The log cannot show anything
+  after the export: the scrub run itself and the merge.
 - **Commit trailers:** each commit carries a `Claude-Session:` id (a session id, nothing private); they stay unless
   stripped before publishing.
