@@ -2,3 +2,6 @@
 .env.*
 !.env.example
 .DS_Store
+logs/raw/
+.review/
+.claude/
