@@ -3,6 +3,7 @@
 Written before the checker exists: run them and see them fail first.
 """
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -55,6 +56,11 @@ GOLDEN = [
 ]
 
 SUMMARY = ("33 references", "10 holds", "1 line only", "20 red", "2 not checked")
+
+
+def summary_counts(last):
+    """The summary's numbers, matched as whole words so "11 line only" is not "1 line only"."""
+    return tuple(int(m.group(1)) for m in (re.search(r"\b(\d+) " + re.escape(p.split(" ", 1)[1]), last) for p in SUMMARY))
 
 
 def run_cli(*args, cwd=REPO):
@@ -169,6 +175,8 @@ class SymlinkTests(unittest.TestCase):
         line = [l for l in out.stdout.splitlines() if "link-out.md:1" in l]
         self.assertEqual(len(line), 1, out.stdout)
         self.assertIn("refused: outside root", line[0])
+        # The copy's root may sit behind a symlink (/tmp): only H3 moves, from one red to another.
+        self.assertEqual(summary_counts(out.stdout.strip().splitlines()[-1]), (33, 10, 1, 20, 2), out.stdout)
 
 
 class CliTests(unittest.TestCase):
@@ -178,8 +186,7 @@ class CliTests(unittest.TestCase):
         out = run_cli("tests/fixtures/report.md", "--root", "tests/fixtures")
         self.assertEqual(out.returncode, 1, out.stderr)
         last = out.stdout.strip().splitlines()[-1]
-        for part in SUMMARY:
-            self.assertIn(part, last)
+        self.assertEqual(summary_counts(last), (33, 10, 1, 20, 2), last)
         self.assertIn("root", last)
 
     def test_all_green_exits_0(self):
