@@ -132,6 +132,11 @@ class FindTests(unittest.TestCase):
     def test_curly_open_may_close_straight(self):
         self.assertEqual(self.one('notes.md:3 \u201cunder a minute" then').quote, "under a minute")
 
+    def test_curly_quote_keeps_straight_marks_inside(self):
+        r = self.one('notes.md:3 \u201cThe kettle" boils fast\u201d')
+        self.assertEqual(r.quote, 'The kettle" boils fast')
+        self.assertEqual(cc.check(r, FIXTURES).verdict, "not in file")
+
     def test_line_and_column_is_not_a_reference(self):
         self.assertEqual(cc.find_refs("a.py:3:7"), ([], 0))
 

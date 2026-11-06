@@ -83,6 +83,14 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Corrected by: none; the next reviewer brief could ask for citations outside backticks
 - Commit: the demo script commit after this entry
 
+## 01:49 The unclosed-quote fix let a curly quote close at a straight mark inside it
+- Agent did: in fix a95a1be, let a curly open close at either mark, so `“The kettle" boils fast”` was cut to
+  "The kettle" and held
+- Helped / failed: failed; the recheck (planning/reviews/task-4-recheck-1.md) caught the new false green
+- Corrected by: a curly open now closes at `”`, and at a straight mark only when no `”` follows on the line; one test
+  pins it. No second recheck: the unit-end reviewer re-reads this fix
+- Commit: the fix commit after this entry
+
 ## Lows
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened
   (patch `open`), a permission-denied file as "file missing"
@@ -98,3 +106,6 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   "not in file", though they are in the file
 - task-4-review-1 F5: no test pins `realpath` over `abspath` for the root, nor the first-three cap on places
 - task-4-review-1 F1 (tail): an empty quote `""` is still "line only"
+- task-4-recheck-1 F2, `check_citations.py:130`: an opened but empty quote (`"`, `""`, `"**"`) is still "line only"
+- task-4-recheck-1 F3, `check_citations.py:65`: a quote wrapped onto the next report line is checked on its first
+  line's words only, and can come out "holds"
