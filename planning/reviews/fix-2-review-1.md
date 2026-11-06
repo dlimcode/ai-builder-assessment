@@ -1,6 +1,8 @@
+(Commit hashes updated after the 7 Nov fix-session history rewrite, on Danish's instruction: old-to-new map in planning/decisions.md.)
+
 (Edited on Danish's instruction, 7 Nov: a real folder name in the test's example was replaced by the invented "Zephyr"; "Old Shoebox" is a listed generic path, so that test case could not use it.)
 
-Review of 6be8f92: the code runs and all 63 tests pass. But a real private word can now get through the export gate in two ways. The scrub then exits 0 and writes the log, and the hit shows only in the report's "generic pattern hits" section.
+Review of 2c988d0: the code runs and all 63 tests pass. But a real private word can now get through the export gate in two ways. The scrub then exits 0 and writes the log, and the hit shows only in the report's "generic pattern hits" section.
 
 ### F1. High. A line break after `~/Documents/` (or before `/folder`) lets a folder under `~/Documents` pass
 - **Where:** `scrub.py:284 "[spaced("~/Documents") + r"/?(?![/\w.-])"]"`.

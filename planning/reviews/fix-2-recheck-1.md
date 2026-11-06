@@ -1,6 +1,8 @@
+(Commit hashes updated after the 7 Nov fix-session history rewrite, on Danish's instruction: old-to-new map in planning/decisions.md.)
+
 (Edited on Danish's instruction, 7 Nov: a real folder name in the test's example was replaced by the invented "Zephyr"; "Old Shoebox" is a listed generic path, so that test case could not use it.)
 
-Recheck of 5fec6ee: F1 and F2 are fixed. All 15 of the review's failure paths, plus its question case, now exit 1 and the log is not written. The fixed tree passes 63 tests. Seven of the new test inputs fail on 6be8f92. What the fix touched still works.
+Recheck of a214578: F1 and F2 are fixed. All 15 of the review's failure paths, plus its question case, now exit 1 and the log is not written. The fixed tree passes 63 tests. Seven of the new test inputs fail on 2c988d0. What the fix touched still works.
 
 There is one gap left, and it was already there before this fix. A folder under `~/Documents` whose name starts with a quote, a bracket, `#` or an emoji still passes, even though the fix's comment says no folder may follow. There is also one Low boundary gap.
 
@@ -16,7 +18,7 @@ There is one gap left, and it was already there before this fix. A folder under 
   - `~/Documents/\n(Old) Clients`
   - the raw home path with `/Documents/[Old] Clients/x`
 - **Controls:** `~/Documents/Étude/x` (an accented first letter) exits 1, and so does `~/Documents/Zephyr`.
-- **Not new:** 6be8f92 passes every one of these inputs too. But the rule "`~/Documents/<folder>` still fails" (`planning/decisions.md:246`) and the new comment "a bare ~/Documents (no folder after it, even past a line break)" (`scrub.py:282`) are still not true.
+- **Not new:** 2c988d0 passes every one of these inputs too. But the rule "`~/Documents/<folder>` still fails" (`planning/decisions.md:246`) and the new comment "a bare ~/Documents (no folder after it, even past a line break)" (`scrub.py:282`) are still not true.
 - **Side gap, outside this fix:** entry `<home>/Documents/Client Files` gets no hit at all on `~/Documents/"Client Files"/x`, because the quote breaks the literal match.
 - **Test gap:** no test input has a folder that starts with a symbol (`tests/test_scrub.py:306`).
 - **Possible fix:** list what may follow the bare `/` instead of what may not. Allow only end of text, or a closing mark (`` ` ``, `'`, `"`, `)`) followed by whitespace or end. The cost: more bare mentions would fail, which is the safe side.
@@ -34,12 +36,12 @@ There is one gap left, and it was already there before this fix. A folder under 
 - **Possible fix:** `(?!\s*[\w-])`, as the review suggested.
 
 ### Notes
-- **The review's question:** `~/Documents/ Clients` (a space on the same line) now exits 1 with entry `<home>/Documents`. On 6be8f92 it exited 0. It is in the test.
-- **The decisions entry overstates the test:** "The reviewer's ten failure paths are in the test, red on 6be8f92" (`planning/decisions.md:262`).
-  - The test adds 7 inputs, and all 7 are red on 6be8f92.
+- **The review's question:** `~/Documents/ Clients` (a space on the same line) now exits 1 with entry `<home>/Documents`. On 2c988d0 it exited 0. It is in the test.
+- **The decisions entry overstates the test:** "The reviewer's ten failure paths are in the test, red on 2c988d0" (`planning/decisions.md:262`).
+  - The test adds 7 inputs, and all 7 are red on 2c988d0.
   - It leaves out: the raw home path wrapped, entry `Documents/Clients`, `Old Shoebox Holdings`, `example.community`, `alex acme`, `someonelse` and `Tan/Users`.
   - I ran all of those end to end, and every one exits 1 now.
-- **The old `<generic>` note is closed:** entry `generic` with `/Users/alex/x` now exits 0 (it was exit 1 on 6be8f92).
+- **The old `<generic>` note is closed:** entry `generic` with `/Users/alex/x` now exits 0 (it was exit 1 on 2c988d0).
 - **`flatten` and `match` still work:**
   - Three `İ` characters (each becomes two when lower-cased) placed before `/Users/alex x` still give a generic hit for entry `alex`.
   - Entry `İstanbul Ltd` wrapped across lines still fails.
@@ -55,7 +57,7 @@ There is one gap left, and it was already there before this fix. A folder under 
 
 ### Runs
 - **Fixed tree:** `timeout 200 python3 -m unittest discover -s tests` gives 63 tests, OK.
-- **Test against the old code:** I copied the fixed tree to a temp folder and swapped in `scrub.py` from 6be8f92. 63 tests ran, 7 failed, all subTests of `test_generic_text_in_the_export_is_reported_not_failed`. Those 7 are the 7 new inputs; the 3 older inputs pass on both.
+- **Test against the old code:** I copied the fixed tree to a temp folder and swapped in `scrub.py` from 2c988d0. 63 tests ran, 7 failed, all subTests of `test_generic_text_in_the_export_is_reported_not_failed`. Those 7 are the 7 new inputs; the 3 older inputs pass on both.
 - **Probes:** two scripts ran old and new `scrub.py` end to end on 55 made-up list/log pairs in temp folders. Each run recorded the exit code, whether the log was written, the count of generic hits and the report sections. The temp folders were removed.
 
 ### Coverage

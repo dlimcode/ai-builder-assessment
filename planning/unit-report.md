@@ -35,13 +35,13 @@ pushed; the log export and scrub (task 13) and the merge (task 14) wait on Danis
 | unit-review-scrub | F3, F4 Medium: stray tag, blockquote | already fixed by 2c4d52c (probes rerun on the head) |
 | unit-review-scrub | F7 Medium: a hit's line pointed at an unwritten file | 9791fcf (re-review) |
 | unit-rereview-fixes | F1, F2 Medium: a regression from 2c4d52c; one bad line dropped the records reading | 77e261a (recheck: unit-rereview-recheck-1, both fixed) |
-| fix-2-review-1 (fix session) | F1 High, F2 Medium: a word past a generic phrase passed the export | 5fec6ee (recheck: fix-2-recheck-1, both fixed) |
-| fix-2-recheck-1 (fix session) | F1 Medium: a `~/Documents` folder starting with a quote passed | 9cea6b8 (not rechecked: a second recheck waits for Danish) |
+| fix-2-review-1 (fix session) | F1 High, F2 Medium: a word past a generic phrase passed the export | a214578 (recheck: fix-2-recheck-1, both fixed) |
+| fix-2-recheck-1 (fix session) | F1 Medium: a `~/Documents` folder starting with a quote passed | de9333b (not rechecked, on Danish's word) |
 
 Danish's own catches, fixed the same way: generic path patterns made `finish-sitting.sh` unable to pass (eaaef3a),
 and a real folder name sat in a test and three reviews (eaaef3a, then the history rewrite and 21e2024).
 In the fix session: the home path in three commands (head commit amended, 19c672c to 224cf86), and the
-export failing on the build's own text (6be8f92, then the fixes above).
+export failing on the build's own text (2c988d0, then the fixes above).
 
 ## What is not verified
 - The real `/export` format and the real saved session file: every scrub test uses made-up text. Danish's read of
@@ -58,7 +58,7 @@ export failing on the build's own text (6be8f92, then the fixes above).
 **Your answer:** in this session type `/export logs/raw/session.txt`, then `/exit`; then in a terminal at the repo root `bash planning/finish-sitting.sh <private-list>`.
 
 **Card 2: Delete the rewrite's backup refs**
-**What it is:** `refs/original/refs/heads/build/check-citations` and the reflog still hold the three old commits with the old folder name, and `refs/backup/home-path/build/check-citations` holds 19c672c with the home path (fix session); the branch's history check now finds 0 hits.
+**What it is:** `refs/original/refs/heads/build/check-citations` and the reflog still hold the three old commits with the old folder name, `refs/backup/home-path/build/check-citations` holds 19c672c with the home path, and `refs/backup/folder-name/refs/heads/build/check-citations` the four fix commits with a folder name (fix session); the branch's history check now finds 0 hits.
 **Your options:** (a) delete them; this cannot be undone. (b) keep them; nothing local is pushed by default, but they stay on this disk.
 **My pick and the case against it:** (a), after task 13's checks pass. Against: until then they are the only way back to the old branch.
 **Your answer:** `refs: delete`

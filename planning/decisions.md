@@ -248,10 +248,10 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   on the real export with a stand-in list (not Danish's), the export is written and 0 hits remain; his list is not
   tried. The repo check is unchanged: every phrase was already in tracked files, which it passed
 - Corrected by: Danish
-- Commit: 6be8f92
+- Commit: 2c988d0
 
 ## 03:06 The fix's review: a real word could still pass beside a generic phrase
-- Agent did: in 6be8f92 blanked each generic phrase before matching, so a hit running past one was hidden too,
+- Agent did: in 2c988d0 blanked each generic phrase before matching, so a hit running past one was hidden too,
   and the bare `~/Documents` rule looked only at the next character
 - Helped / failed: the review helped (1 High, 1 Medium: planning/reviews/fix-2-review-1.md). F1: `~/Documents/`
   then a line break and a folder passed. F2: a longer word starting with a phrase (`/Users/alexandra`) passed.
@@ -259,20 +259,39 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Corrected by: nothing is blanked now. A hit is generic only if it lies wholly inside a generic place in the text
   (checked by position); each phrase needs a non-letter after it; bare `~/Documents` takes no folder after it, past
   whitespace too. The cost, on the safe side: `~/Documents/` at a line end before any word now fails. The
-  reviewer's ten failure paths are in the test, red on 6be8f92. `../claude-501x` (a made-up folder in
+  reviewer's ten failure paths are in the test, red on 2c988d0. `../claude-501x` (a made-up folder in
   task-4-review-1) is listed, since the boundary now fails it. Stand-in list run on the real export: written, 0 hits
-- Commit: 5fec6ee
+- Commit: a214578
 
 ## 03:13 The fix's recheck: a folder starting with a quote or symbol still passed
-- Agent did: in 5fec6ee wrote the bare `~/Documents` rule as what may not follow it (a letter, digit, `_`, `.`, `-`)
+- Agent did: in a214578 wrote the bare `~/Documents` rule as what may not follow it (a letter, digit, `_`, `.`, `-`)
 - Helped / failed: the recheck helped (F1 Medium, F2 Low: planning/reviews/fix-2-recheck-1.md); it confirmed the
   review's F1 and F2 fixed. `~/Documents/"Client Files"/x` passed, as did `(Old)`, `#Inbox`, an emoji. It also
   found the 03:06 entry overstates: the test took 7 of the review's inputs, not ten (the recheck ran the rest:
   all fail now)
 - Corrected by: the rule now lists what may follow: after the slash only a closing mark not before a word or
   slash, or the end; with no slash, a closing mark, punctuation, a space not before a slash, or the end. Four
-  recheck inputs are in the test, red on 5fec6ee. Stand-in list run on the real export: written, 0 hits. Not
+  recheck inputs are in the test, red on a214578. Stand-in list run on the real export: written, 0 hits. Not
   rechecked: the recipe allows one recheck a fix; a second waits for Danish's word. F2 Low is under Lows
+- Commit: de9333b
+
+## 03:26 A real folder name came back in the fix session's test and reviews; history rewritten
+- Agent did: used a folder name from this session's sandbox settings (its denied-folder list) as the example of a
+  folder under `~/Documents`, in the test; the review and recheck quoted it. Three commits held it
+- Helped / failed: failed; Danish found it. The rule he set: never take an example name from the settings or
+  start-up text. It is now the invented "Zephyr", not "Old Shoebox" as he asked: `~/Documents/Old Shoebox` is a
+  listed generic path, so that test case passed and the test failed (tried, then undone). Each review says it was
+  edited, and why
+- Corrected by: Danish. `git filter-branch` over `95141c7..build/check-citations`: a tree filter replaced the name in
+  the test and the two reviews, a message filter mapped `Fixes:` hashes (a first run left them blank, so the branch
+  was reset to its backup and run again). Old to new:
+  6be8f92 -> 2c988d0
+  5fec6ee -> a214578
+  9cea6b8 -> de9333b
+  9beb3d5 -> ecbf1b3
+  The history check (`git log -p --format=%B main HEAD`) finds the name 0 times; tests OK in each rewritten commit.
+  The old commits are kept under `refs/backup/folder-name/...` until he says; the git-ignored `.review/` exports
+  still hold it (card 3). No second recheck of de9333b, on his word
 - Commit: the commit after this entry
 
 ## 02:59 This fix session's log is not exported
