@@ -131,6 +131,17 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   the scrub after the session was clean
 - Commit: the fix commit after this entry
 
+## 02:06 The scrub recheck: the fixes cut and matched too much
+- Agent did: in the scrub fix waves, let any opening reminder tag start a cut, matched list words with all spaces
+  removed anywhere, and ended loaded text at a `> ` line after a blank line
+- Helped / failed: the recheck helped (planning/reviews/task-7-recheck-1.md): one tag quoted in code (this
+  session's own commands quote it) would cut the whole rest of the real export; "Tan" matched "that answer"; a
+  blockquote after a blank line still leaked the rest of a rules file
+- Corrected by: at depth 0 only a tag that starts its line (after an indent, tree glyphs or a closing tag) opens a
+  block; the no-space pass counts only matches that cross a line break; loaded text ends only at a `⏺` reply, so
+  the prompt after it is cut too (safe). No second recheck: the unit-end re-review reads this fix
+- Commit: the fix commit after this entry
+
 ## Lows
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened
   (patch `open`), a permission-denied file as "file missing"
@@ -168,3 +179,12 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - unit-review-docs F6, `README.md:11-17`: the sample output names no command and is not marked as an excerpt
 - unit-review-docs F8, `planning/reviews/`: saved word for word, the replies hold system temp paths (`/tmp/...`,
   `/private/var`); no home folder or username. The brief bars absolute paths; the recipe saves replies verbatim
+- task-7-recheck-1 F4a, `scrub.py` check-only: a path-shaped list entry is not matched in its `~/` form in tracked files
+- task-7-recheck-1 F4b, `scrub.py` `with_path_forms`: an entry ending in `/` (e.g. a home folder) becomes `~/` and
+  matches every scrubbed path, so the run can never pass
+- task-7-recheck-1 F6a, `planning/finish-sitting.sh`: an old `logs/session.txt` survives a refused list or a crash,
+  and the message then says "hits in the export"
+- task-7-recheck-1 F3a (question), `planning/finish-sitting.sh:24`: `git log -p` prints `Author:`; if Danish's list
+  holds his commit name or email, every branch fails. Danish's call
+- task-7-recheck-1 (note): an indented `SessionStart` or `Contents of ... CLAUDE.md` inside a reply now cuts the
+  rest of that reply (safe, loses text)

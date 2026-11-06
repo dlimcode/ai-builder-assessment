@@ -85,7 +85,7 @@ class ScrubTests(unittest.TestCase):
 
     def test_what_stays(self):
         for kept in ["> /build Read the brief", "## Next heading stays", "Kept after the skills list.",
-                     "> next prompt stays", "⏺ The reply stays.", "./check_citations.py", "~/notes.txt",
+                     "⏺ The reply stays.", "./check_citations.py", "~/notes.txt",
                      "<repo-folder>", "~-Other", "<tmp>/run.1", "<tmp>/claude-501/x", "<tmp>/y", "<email>",
                      "<secret>", "<mac>", "Signed by alex"]:
             self.assertIn(kept, self.out)
@@ -126,13 +126,32 @@ class ScrubTests(unittest.TestCase):
                 "  \u23bf  Base directory for this skill: x\nsecret-project body\n\u23fa reply\n")
         out, _ = scrub.scrub(text, PATHS)
         self.assertEqual(scrub.list_hits(out, PATTERNS, USER)[0], [], out)
-        self.assertIn("> next prompt", out)
         self.assertIn("\u23fa reply", out)
 
     def test_a_list_entry_written_as_a_path_still_matches(self):
         out, _ = scrub.scrub("see /Users/alex/Documents/Old Shoebox/Zephyr/plan.md\n", PATHS)
         entries = ["/Users/alex/Documents/Old Shoebox/Zephyr"]
         self.assertTrue(scrub.list_hits(out, scrub.with_path_forms(entries, PATHS), USER)[0])
+
+    def test_a_quote_after_a_blank_line_does_not_end_loaded_text(self):
+        text = "Contents of /x/CLAUDE.md:\n# rules\n\n> quoted rule\nAcme Widgets rule\n\n> prompt\n\u23fa reply kept\n"
+        out, _ = scrub.scrub(text, PATHS)
+        self.assertNotIn("Acme", out)
+        self.assertIn("\u23fa reply kept", out)
+
+    def test_a_tag_quoted_mid_line_does_not_cut_the_rest(self):
+        text = ('for gone in ["<system-reminder>", "x"]:\n\u23fa reply kept\n<system-reminder>\nsecret-project\n'
+                "</system-reminder>\nafter kept\n")
+        out, _ = scrub.scrub(text, PATHS)
+        self.assertIn("reply kept", out)
+        self.assertIn("after kept", out)
+        self.assertNotIn("secret-project", out)
+
+    def test_short_entries_do_not_match_across_spaces(self):
+        for entry, text in [("Tan", "I think that answer is right."), ("Sam", "This was amazing."),
+                            ("Vela", "we have lazy loading")]:
+            with self.subTest(entry=entry):
+                self.assertEqual(scrub.list_hits(text, [entry], USER)[0], [])
 
     def test_list_match_ignores_case(self):
         hits, _ = scrub.list_hits("SECRET-PROJECT\n", PATTERNS, USER)

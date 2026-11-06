@@ -17,6 +17,7 @@ import tempfile
 LEAD = r"^[\s\u23bf\u2502\u2514\u251c\u2500]*"  # an indent or the export's tree glyphs before a marker
 HEADING = re.compile(r"^#{1,2} ")
 REMINDER_TAG = re.compile(r"<(/)?system-reminder>")
+OPENS_LINE = re.compile(r"[\s\u23bf\u2502\u2514\u251c\u2500]*")
 # Pass 1: (kind, start marker, where the block ends). A block whose end is never found runs to the end of
 # the file: cutting too much is safe, the report shows it.
 BLOCKS = [
@@ -48,9 +49,9 @@ def block_end(lines, i, how):
             continue
         if how == "next heading" and HEADING.match(lines[j]):
             return j
-        # A reply, or a prompt after a blank line: a quoted line inside a rules file or skill does not end it.
-        if how == "next message" and (lines[j].startswith("\u23fa") or
-                                      (lines[j].startswith("> ") and not lines[j - 1].strip())):
+        # Only a reply ends it: a quoted line inside a rules file or skill looks like a prompt. The prompt after
+        # the loaded text is cut with it, which is safe.
+        if how == "next message" and lines[j].startswith("\u23fa"):
             return j
         if how == "end of list" and not lines[j].strip() and any(l.startswith("- ") for l in lines[i:j]):
             return j + 1
@@ -63,6 +64,9 @@ def cut_reminders(text):
     out, depth, start, pos = [], 0, 0, 0
     for m in REMINDER_TAG.finditer(text):
         if m.group(1) is None:
+            before = text[text.rfind("\n", 0, m.start()) + 1:m.start()].replace("</system-reminder>", "")
+            if depth == 0 and not OPENS_LINE.fullmatch(before):
+                continue  # a tag quoted mid-line, e.g. in code, is not a block
             if depth == 0:
                 out.append(text[pos:m.start()])
                 start = m.start()
@@ -177,16 +181,18 @@ def list_hits(text, patterns, username):
         flat, lines = flatten(text, space)
         for n, forms in enumerate(patterns, 1):
             for p in {space.join(f.lower().split()) for f in ((forms,) if isinstance(forms, str) else forms)}:
-                hits.update(match(p, flat, lines, n, space.join(username.lower().split()), user_lines))
+                hits.update(match(p, flat, lines, n, space.join(username.lower().split()), user_lines, space == ""))
     return sorted(hits), sorted(user_lines.items())
 
 
-def match(p, flat, lines, n, user, user_lines):
+def match(p, flat, lines, n, user, user_lines, crossing):
     """(line, entry number) for each place p is in flat; the username's places go to user_lines instead."""
     found = set()
     if not p or p in ("~", ".", "<tmp>", "<repo-folder>"):
         return found  # a blank entry, or one that was only a machine path
     for m in re.finditer(re.escape(p), flat):
+        if crossing and lines[m.start()] == lines[m.end() - 1]:
+            continue  # with spaces removed, only a word split across lines counts, or "Tan" hits "that answer"
         line = lines[m.start()]
         if p == user:
             user_lines.setdefault(line, flat[max(0, m.start() - 20):m.end() + 20])
