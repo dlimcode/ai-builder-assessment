@@ -148,8 +148,8 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Agent did: copied a reviewer's example path into `tests/test_scrub.py` and saved two reviews holding it; the
   reviewer had taken the folder name from this session's sandbox settings
 - Helped / failed: failed; the name is Danish's own folder. It is now the invented "Old Shoebox" in the test and
-  both reviews (each review says it was edited, and why). The old name is still in three branch commits (accb3c6,
-  60d5e4b, cc51f43) and in the git-ignored local exports under `.review/`; no commit message holds it
+  both reviews (each review says it was edited, and why). The old name is still in three branch commits (2aa7047,
+  354f07e, 2c4d52c) and in the git-ignored local exports under `.review/`; no commit message holds it
 - Corrected by: Danish. How it leaves history before any push: rewrite the branch from main, replacing the name in
   every commit's files (`git filter-branch --tree-filter` over `main..build/check-citations`), then drop the backup
   refs and expire the reflog so no local ref points at the old commits; nothing is pushed until then. Danish's call
@@ -168,7 +168,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 ## 02:18 Unit-end scrub review: the saved session file, indented blocks, slashes, main's history
 - Agent did: built the scrub for the `/export` text only, with block ends that assumed unindented lists and headings
 - Helped / failed: the review helped (1 High, 6 Medium, 3 Low, 2 questions: planning/reviews/unit-review-scrub.md);
-  its F3 and F4 were already fixed by cc51f43 (its probes rerun on the head: nothing cut wrongly, the recipe cut)
+  its F3 and F4 were already fixed by 2c4d52c (its probes rerun on the head: nothing cut wrongly, the recipe cut)
 - Corrected by: F1 a file of JSON records (the saved session file, the fallback if `/export` fails) is read as its
   records' strings, each after a reply mark, so markers start lines and escaped line breaks are real; F2 lists and
   headings may be indented, in one pass (was quadratic); F5 a list entry's trailing `/` is dropped; F6 the history
@@ -177,14 +177,14 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 
 ## 02:18 Scrub: a hit's line number now points at a file that exists
 - Agent did: on a hit, the report named lines of a scrubbed log that was never written (unit-review-scrub F7)
-- Helped / failed: the review helped; the no-space half of F7 was already fixed in cc51f43
+- Helped / failed: the review helped; the no-space half of F7 was already fixed in 2c4d52c
 - Corrected by: on a hit, the scrubbed text is written beside the report (`<report>.scrubbed.txt`, in the temp
   folder outside the repo) and both messages say where; one test
 - Commit: the fix commit after this entry
 
 ## 02:28 The unit-end re-review: one regression and one silent fallback in the scrub fixes
-- Agent did: in cc51f43 let only a line-start tag open a reminder block, which kept a reminder opening after a
-  closed one or after a `> ` mark; in 72bf29b dropped the whole records reading on one bad line
+- Agent did: in 2c4d52c let only a line-start tag open a reminder block, which kept a reminder opening after a
+  closed one or after a `> ` mark; in ad698d1 dropped the whole records reading on one bad line
 - Helped / failed: the re-review helped (2 Medium, 5 Low, 2 questions: planning/reviews/unit-rereview-fixes.md);
   it also confirmed all six fixes answer their findings and all 19 dog-food reds are explained
 - Corrected by: closed reminder spans and a `>` before a tag no longer stop it opening a block; a session file is read
@@ -198,6 +198,25 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Corrected by: the agent: every count of the name rerun with `command grep` and Python: working tree 0, HEAD tree 0,
   commit messages 0, history 15 (the rewrite removes these; rehearsed on a clone: 15 to 0)
 - Commit: none
+
+## 02:29 History rewritten to remove the old folder name; hashes mapped
+- Agent did: on Danish's "history: rewrite", rehearsed on a throwaway clone, then ran `git filter-branch` over
+  `main..build/check-citations`: a tree filter replaced the name with "Old Shoebox" in every commit's files, a
+  message filter mapped `Fixes:` hashes. Commits before accb3c6 kept their hashes; the final tree is unchanged
+- Helped / failed: helped; the history check (`scrub.py --check-only`, a list holding only the name, over
+  `git log -p --format=%B HEAD`) gives `private list: 0 hits`; tests OK; no commit message cites an old hash.
+  Old to new:
+  accb3c6 -> 2aa7047
+  60d5e4b -> 354f07e
+  c303381 -> 65a489a
+  cc51f43 -> 2c4d52c
+  79cf188 -> eaaef3a
+  72bf29b -> ad698d1
+  9a5d184 -> 9791fcf
+  3d68565 -> 77e261a
+- Corrected by: Danish's conditions: this one commit maps every cited hash in decisions and the reviews; the backup
+  ref `refs/original/refs/heads/build/check-citations` and the reflog stay until he says to delete them
+- Commit: the commit after this entry
 
 ## Lows
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened

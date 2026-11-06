@@ -1,8 +1,10 @@
 # Unit-end review of build/check-citations at 68f73d6: what the branch says and what it must not hold
 
+(Commit hashes updated after the 7 Nov history rewrite, on Danish's instruction: old-to-new map in planning/decisions.md.)
+
 **Outcome:** I found nothing private in the branch. There are two Medium findings. First, the demo script adds two reds that nobody explains, so the brief's done-check fails. Second, the README states as done some work that the unit end and the log export have not yet done. There are also seven Lows, two questions and one note.
 
-I reviewed the export of 68f73d6. While I was reviewing, two more commits landed on the branch: 0cb53ca (01:49) and accb3c6 (01:54). I did not read them, so some of what follows may already be fixed. Citations below are written without backticks so that `check_citations.py` can check this review. I ran it on them before handing back, and every one holds.
+I reviewed the export of 68f73d6. While I was reviewing, two more commits landed on the branch: 0cb53ca (01:49) and 2aa7047 (01:54). I did not read them, so some of what follows may already be fixed. Citations below are written without backticks so that `check_citations.py` can check this review. I ran it on them before handing back, and every one holds.
 
 ### F1. Medium. The demo script adds two reds that nobody explains, and its "19 red, all real" is wrong at its own commit
 - **This state:** the code span at planning/demo-script.md:28 "point at row 3" wraps onto the next line. The checker scans for code spans one line at a time, so on line 29 the fixture example `notes.md:3` and the absolute path `/etc/hosts:1` are read as real references.
@@ -20,7 +22,7 @@ I reviewed the export of 68f73d6. While I was reviewing, two more commits landed
 
 ### F2. Medium. The README states as done what the unit end and the log export have not done yet
 At 68f73d6, these claims are false:
-- **Task 7's review:** README.md:90 "a fresh reviewer agent read the commits for tasks 2, 4 and 7, and three more read the branch at the" end. At this commit `planning/reviews/` holds only task 2 and task 4 replies. In the working tree, a task-7 review was added later by accb3c6.
+- **Task 7's review:** README.md:90 "a fresh reviewer agent read the commits for tasks 2, 4 and 7, and three more read the branch at the" end. At this commit `planning/reviews/` holds only task 2 and task 4 replies. In the working tree, a task-7 review was added later by 2aa7047.
 - **The same claim in the demo:** planning/demo-script.md:16 "a fresh reviewer agent on the commits for tasks 2, 4 and 7" and planning/demo-script.md:17 "every reply saved in" `planning/reviews/`.
 - **The three unit-end reviewers:** only true once task 11 finishes (planning/README.md:90 "Three fresh reviewers on the branch").
 - **README.md:91 "each Medium-or-worse finding has its own" fix commit:**
@@ -76,7 +78,7 @@ README.md:70 "paths with spaces, and URLs (skipped, not checked)". In the code, 
 - **How much it matters:** the log owns up to all of this, which is good. The README should be scoped to match, for example: "written during the sitting; three times corrected (see the 01:46 entry)".
 
 ### Q1. Question. Is each Medium-or-worse task 7 finding fixed in its own commit?
-accb3c6 is titled "close four leaks the task 7 review reproduced", so it is one commit for four findings. If two or more of them are Medium or worse, README line 91 is false. I did not read task-7-review-1.md because it is past the commit under review.
+2aa7047 is titled "close four leaks the task 7 review reproduced", so it is one commit for four findings. If two or more of them are Medium or worse, README line 91 is false. I did not read task-7-review-1.md because it is past the commit under review.
 
 ### Q2. Question. Were the dry run's answers already recorded on main?
 - The decisions log says the answers never reached the agent: planning/decisions.md:11 "Danish to add the three answers".
@@ -134,5 +136,5 @@ Every search ran over `git grep 68f73d6` and over the messages of all 11 commits
 | Commit messages main..68f73d6 | Compared, for grep and for claims (F4 for a95a1be). I did not check "04 F11", which is outside my read list. |
 | Every tracked file (must not hold) | Compared by the greps above. Not compared: names that are not on any list I hold; the private word list lives outside the repo and is Danish's check. |
 | planning/reviews/ | Read headings and grepped, only to test the README's claims. |
-| 0cb53ca and accb3c6 (after 68f73d6) | Not compared: outside this review's commit. They may change F2 and Q1. |
+| 0cb53ca and 2aa7047 (after 68f73d6) | Not compared: outside this review's commit. They may change F2 and Q1. |
 | planning/README.md task 0 and commit 4699865 | Not compared: outside my read list (Q2). |

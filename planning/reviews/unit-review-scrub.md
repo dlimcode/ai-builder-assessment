@@ -1,4 +1,6 @@
-# Unit-end review 3: the log scrub as a whole (60d5e4b)
+# Unit-end review 3: the log scrub as a whole (354f07e)
+
+(Commit hashes updated after the 7 Nov history rewrite, on Danish's instruction: old-to-new map in planning/decisions.md.)
 
 (Saved as received, with two edits. The agent tool neutralised the reminder tag in this reply, writing it as `<\system-reminder>`. On Danish's instruction, a real folder name in the F5 example is replaced by the invented "Old Shoebox".)
 
@@ -17,7 +19,7 @@
   - The real run would exit 0 and write all of it, with only paths shortened to `~`.
 - **Confidence:** I am taking the file to be JSON lines (Claude Code's session store) without having seen it. That is about 85% sure.
 
-### F2. Medium. Indented skills list or sandbox text: the rest of the log is cut, slowly (introduced by accb3c6)
+### F2. Medium. Indented skills list or sandbox text: the rest of the log is cut, slowly (introduced by 2aa7047)
 - **Cause:** `scrub.py:25` now accepts an indented marker (`LEAD + "The following skills are available"`). The end test at `scrub.py:55` still needs an unindented item: `any(l.startswith("- ") for l in lines[i:j])`.
 - **What happens with indented items (`  - design: ...`):** the block runs to the end of the file. The log becomes one line, `<cut: skills list, N lines>`, and the run exits 0.
 - **It is also quadratic, because `any(...)` re-scans from the marker at every blank line:**
@@ -36,7 +38,7 @@
 - **Why it will happen:** this sitting built the scrub, so its export quotes the tag many times (in `tests/test_scrub.py:36`, in greps and in commands).
 - **Repro:** a made-up export with the reply line `⏺ Bash(grep -n "<\system-reminder>" tests/test_scrub.py)` followed by 506 lines. Result: `2 lines left of 507`, and the run would exit 0.
 
-### F4. Medium. A blockquote in a loaded recipe ends the cut early, and the rest of the recipe is kept (introduced by 60d5e4b)
+### F4. Medium. A blockquote in a loaded recipe ends the cut early, and the rest of the recipe is kept (introduced by 354f07e)
 - **Cause:** `scrub.py:52-53` ends "next message" at `lines[j].startswith("> ") and not lines[j - 1].strip()`. In markdown, a blockquote normally follows a blank line.
 - **Repro:** skill text `# Build recipe\nStep one.\n\n> Note: quoted guidance\n\nRECIPE-REST private steps follow`.
   - Result: `<cut: skill text, 4 lines>`.
@@ -121,7 +123,7 @@ Outside the repo it wrote only `TMPDIR/scrub.XXXXXX/{branch-history.txt,files,sc
 | planning/02-demo-input-and-logs.md §3 | Compared pass by pass. "Any hit ... exit non-zero" holds. Path-shaped entries can still miss (F5). The report's line numbers cannot be used when there is a hit (F7). |
 | planning/03-plan.md §7 | Compared. Danish runs it after the session, and the report stays outside the repo (checked on disk). The made-up-log-only tests hold. |
 | planning/build-brief.md, "Logs" and "Secrets and private material" | Compared. "Checks every tracked file and every commit message" misses main's commits (F6). Absolute paths in tracked files are still only username hits (already noted in review 1, not repeated). |
-| scrub.py, tests/test_scrub.py, finish-sitting.sh, decisions.md scrub entries | Compared by reading the diff ef0fdaa..60d5e4b, made-up probes, timing runs, end-to-end runs in a temp git repo, and one mutation. decisions.md 01:46 says "fails safe, not open"; that does not hold for F1 or F4. |
+| scrub.py, tests/test_scrub.py, finish-sitting.sh, decisions.md scrub entries | Compared by reading the diff ef0fdaa..354f07e, made-up probes, timing runs, end-to-end runs in a temp git repo, and one mutation. decisions.md 01:46 says "fails safe, not open"; that does not hold for F1 or F4. |
 | The real `/export` format, the real `/build` recipe, the real private list | Not compared. Out of scope (outside the repo or not yet made), so F1, F4 and the questions rest on stated assumptions. |
 
 All probes used made-up text in `/tmp/claude-501/unit3.E9KceT`, which has been removed. Nothing in the repo was changed.

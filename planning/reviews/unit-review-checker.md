@@ -1,5 +1,7 @@
 ## Unit-end review, area: the checker at 68f73d6
 
+(Commit hashes updated after the 7 Nov history rewrite, on Danish's instruction: old-to-new map in planning/decisions.md.)
+
 **Outcome:** the checker does what tasks 3 to 6 and 01 sections 2 to 5 ask, and its exit codes are right in every case you listed. I found one Medium and five Lows, plus one question. Nothing is Critical or High.
 
 **What I ran:**
@@ -130,7 +132,7 @@
 | planning/README.md, task 10 | Partly. The `git log` check passes. The suite was run in the export, not a fresh clone. The export matches the commit for the checker, its tests and README.md. Fixtures were not compared byte for byte. |
 | 01, sections 2-5 | Compared with probes. Gaps: F1 (code spans), F6 (spaces), Q1, and the U+2026 note. The golden rows are verified by the passing suite and the run on `report.md`. |
 | planning/build-brief.md | Compared: done-when items 1 and 2, the code rule, and no absolute paths in output (`~`). Gap: F1 (`:64`). |
-| README.md | Every command run. Checker claims compared: F1 (`:39`), F4 (`:32`), F6 (`:70`); the rest are true. "How it was built" is not in my area. A task-7 review exists only after 68f73d6 (accb3c6). |
+| README.md | Every command run. Checker claims compared: F1 (`:39`), F4 (`:32`), F6 (`:70`); the rest are true. "How it was built" is not in my area. A task-7 review exists only after 68f73d6 (2aa7047). |
 | check_citations.py | Read in full, run, probed, and two mutants run in temp copies. |
 | tests/test_check_citations.py, fixtures, fixtures-evil | Read and run. The guard on `:102` and the non-ESC control characters are untested (F2). |
 | Earlier reviews and the Lows in decisions.md | Read so as not to repeat them. F5 builds on a task-4 note but adds a measured cost. |

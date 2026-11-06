@@ -1,4 +1,6 @@
-# Recheck of the task 7 scrub fixes (accb3c6, 60d5e4b)
+# Recheck of the task 7 scrub fixes (2aa7047, 354f07e)
+
+(Commit hashes updated after the 7 Nov history rewrite, on Danish's instruction: old-to-new map in planning/decisions.md.)
 
 (Edited on Danish's instruction, 7 Nov: a real folder name in one example was replaced by the invented "Old Shoebox".)
 
