@@ -1,13 +1,17 @@
-Last confirmed: 2026-11-07
+Last confirmed: 2026-11-08
 
 # State: the citation checker sitting
 
-**Where it stands:** built, scrubbed and merged into `main` (fast-forward, local) on Danish's yes, 7 Nov. Not pushed,
-not public. `logs/session.txt` is committed; the three backup refs and `.review/` are deleted.
+**Where it stands:** built, scrubbed and merged into `main` (fast-forward) on Danish's yes, 7 Nov. Git records a push
+of `main` (c77f470) to `origin` (`git reflog show origin/main`, read 8 Nov); the remote itself was not checked.
+`logs/session.txt` is committed; the three backup refs and `.review/` are deleted. On 8 Nov, four doc fixes
+(decisions 8 Nov 11:35) are on `build/check-citations`, not yet in `main`.
 
 ## Waits on Danish
+- **The 8 Nov doc fixes into `main`:** his yes to the merge.
+- **The push:** STATE said "not pushed" but git records one; check the remote, then settle card 4 in that light.
 - **Card 4, the author email:** every commit carries his webmail address; keep it, or rewrite to the noreply address
-  (every commit, main's too) before any push.
+  (every commit, main's too); if `main` is already pushed, a rewrite needs a force-push.
 - **The reflog:** it still points at the old commits that held the home path and the folder names; local only, gone
   after `git reflog expire --expire=now --all && git gc --prune=now`, on his word.
 - **Not in this sitting:** pushing, making the repo public, recording the demo.
