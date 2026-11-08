@@ -18,7 +18,7 @@ of `main` (c77f470) to `origin` (`git reflog show origin/main`, read 8 Nov); the
 
 ## Done this sitting
 - Tests: 63, all pass; the golden set came before any checker code.
-- Dog-food run on `planning/*.md`: 19 red, all explained in `planning/decisions.md` (01:39 entry).
+- Dog-food run on `planning/*.md`: 23 red, all explained in `planning/decisions.md` (01:39 and 03:32 entries).
 - Fix session (decisions 02:56, 02:59): the home path left the head commit (now 224cf86); the scrub now
   reports hits wholly inside the build's own text instead of failing the export (2c988d0, then a214578
   and de9333b after its review and recheck: `planning/reviews/fix-2-*.md`). de9333b is not rechecked,

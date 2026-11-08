@@ -100,10 +100,11 @@ more lines and cited at the wrong place come out "not in file").
   three entry times were guessed and then corrected (its own entry says so). Smaller known gaps are its `## Lows`.
 - **Logs:** `logs/session.txt` is the build session's `/export`, scrubbed by `scrub.py` (start-up blocks, this
   machine's paths, emails, tokens; then a private word list kept outside the repo) and read in full by a person.
-  It is not every session: the planning team's work before 01:05 on 7 Nov, the short fix session after the
-  export, and the 8 Nov doc fixes are not in it. Their output is in `planning/` and `git log`.
+  It is not every session: the planning sessions before the build began at 01:33 on 7 Nov, the short fix
+  session after the export, and the 8 Nov doc fixes are not in it. Their output is in `planning/` and `git log`.
 - **Time, 7 Nov:** planning about 30 minutes; the build 01:33-02:35; the log, its scrub and the fixes to 03:32.
   Making the log safe to publish took longer than it should have, about as long as the build. `scrub.py` is a
   side tool for that job, not part of the checker.
-- **Commit trailers:** each commit carries a `Claude-Session:` id (a session id, nothing private); they stay unless
-  stripped before publishing.
+- **Commit trailers:** each commit from the build on carries a `Claude-Session:` id (a session id, nothing
+  private), except five 8 Nov doc commits (90f74d2 to 6f2aadf) made without it; they stay unless stripped
+  before publishing.

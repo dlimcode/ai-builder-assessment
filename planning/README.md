@@ -1,6 +1,6 @@
 # The build sitting, step by step (7 Nov 2026)
 
-> **Read this first.** The files here, in the order they were written:
+> **Read this first.** The files here:
 > - `00-options-considered.md`: the ideas weighed, and why a citation checker.
 > - `01-prior-art-and-formats.md`: tools that exist, the reference shapes read, the match rule, the verdicts, the golden set.
 > - `02-demo-input-and-logs.md`: what the demo runs on, and how the session log is exported and scrubbed.

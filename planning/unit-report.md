@@ -1,7 +1,7 @@
 # Unit report: check-citations (7 Nov 2026)
 
 **Status: superseded.** Merged into `main` on 7 Nov; 63 tests pass. For where it stands now, see
-`planning/STATE.md`. The rest of this file is the report as written before the merge.
+`planning/STATE.md`. The rest of this file is the report as written before the merge, except the Lows count, fixed to 44 on 8 Nov.
 
 **Outcome:** `check_citations.py`, `scrub.py`, `planning/finish-sitting.sh`, README and demo script are built on
 `build/check-citations`, 62 tests pass, and every Medium-or-worse finding is fixed and checked again. Not merged, not
