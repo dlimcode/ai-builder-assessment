@@ -319,6 +319,25 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Corrected by: none; left as they are, since those files are the planning record
 - Commit: the commit after this entry
 
+## 8 Nov, before 11:35 (clock not read) STATE said "not pushed", but git records a push
+- Agent did: asked to follow the build brief again, found nothing to build: the branch and `main` are the same
+  commit, 63 tests pass, 23 red as the 03:32 entry says
+- Helped / failed: helped; `planning/STATE.md` says "Not pushed", but `git reflog show origin/main` records
+  "update by push" to c77f470. The remote itself was not checked
+- Corrected by: open; put to Danish, not yet answered
+- Commit: none
+
+## 8 Nov 11:35 Four doc fixes before the repo goes public
+- Agent did: on Danish's list, added a read-this-first block to `planning/README.md` (90f74d2), rewrote README's
+  Logs bullet with the sessions the log leaves out and the time spent (79b2ffe), marked the unit report superseded
+  with 44 Lows (1c6f593), and brought the demo script to 8 Nov's numbers (the commit holding this entry)
+- Helped / failed: the block moved every later line of `planning/README.md` down by 16: the miscite the demo shows
+  is now at line 129, not 113, and the 03:32 entry's "planning/README.md line 8" is now line 24. Three docs-review
+  quotes of that file in `planning/reviews/` went "wrong line" (reviewers' notes run: 35 red before, 38 after). The
+  `planning/*.md` run stays at 23 red; the unit report also said 43 Lows in card 5, fixed to 44 with the table
+- Corrected by: Danish's instruction; this session's log is not exported or committed
+- Commit: 90f74d2, 79b2ffe, 1c6f593 and the commit holding this entry
+
 ## Lows
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened
   (patch `open`), a permission-denied file as "file missing"
