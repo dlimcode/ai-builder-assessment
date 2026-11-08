@@ -1,5 +1,21 @@
 # The build sitting, step by step (7 Nov 2026)
 
+> **Read this first.** The files here, in the order they were written:
+> - `00-options-considered.md`: the ideas weighed, and why a citation checker.
+> - `01-prior-art-and-formats.md`: tools that exist, the reference shapes read, the match rule, the verdicts, the golden set.
+> - `02-demo-input-and-logs.md`: what the demo runs on, and how the session log is exported and scrubbed.
+> - `03-plan.md`: the plan for the sitting. `04-devils-advocate.md`: its critique, and the fixes.
+> - `README.md` (this file): the task list the build followed. `build-brief.md`: the instructions the build started from.
+> - `start-sitting.sh` / `finish-sitting.sh`: start the session with its read limits; scrub and check before a push.
+> - `decisions.md`: each moment the agent helped, failed or was corrected, as it happened. `reviews/`: reviewer replies.
+> - `demo-script.md`: the five-minute demo. `unit-report.md`: the end-of-build report (superseded). `STATE.md`: where it stands now.
+>
+> Words used throughout: a **sitting** is one desk session of a few hours; a **card** is a question only Danish
+> answers, with options, a pick and the reply to type; the **golden set** is the table of example references and
+> their expected verdicts, written as tests before any checker code; **dog-food** is running the checker on these
+> planning notes themselves; a **done-check** is the command that shows a task is finished; the **fence** is the
+> read limit that kept the session inside this repo.
+
 **Answer: one sitting builds `check_citations.py` (one Python 3.9 file, standard library, no model call), tested by a
 33-row golden set committed before any checker code, plus the log scrub and the demo script: 233 planned minutes and a
 7-minute buffer, 240 in all [assumed]. The demo moment: the checker run on this folder's own notes, then a red line
