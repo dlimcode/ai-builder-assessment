@@ -33,11 +33,12 @@ before recording and update any number that moved.
   (`wrong line, found at notes.md:3`) and the `/etc/hosts:1` line, `refused: outside root`: an absolute
   path is never opened.
 - The reviewers' notes against the final code: `python3 check_citations.py planning/reviews/*.md --root .`
-  Measured on 8 Nov: 242 references, 28 hold, 12 line only, 38 red, 164 not checked. The reds are real: where a
+  Measured on 8 Nov: 270 references, 27 hold, 19 line only, 57 red, 167 not checked. The reds are real: where a
   fix removed the words a reviewer quoted, it says "not in file" (e.g. the README lines the docs review flagged);
-  where a fix moved them, "wrong line, found at" the new line (e.g. a `scrub.py:221` quote now at 238). Three are
-  docs-review quotes of `planning/README.md`, moved down 16 lines by the read-this-first block. Most citations are
-  "not checked" because many reviewers wrapped them in backticks. Say both aloud.
+  where a fix moved them, "wrong line, found at" the new line (e.g. a `scrub.py:221` quote now at 238). Many came
+  from the 8 Nov doc fixes: quotes of `planning/README.md` moved down 16 lines by its read-this-first block, and
+  quotes of this script's own lines, moved or rewritten. Most citations are "not checked" because many reviewers
+  wrapped them in backticks. Say both aloud.
 
 ## 5. Cut (40 s)
 Three said aloud: `...` inside a quote (taken literally, and the line says it is not supported); fuzzy or

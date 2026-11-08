@@ -333,12 +333,25 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   with 44 Lows (1c6f593), and brought the demo script to 8 Nov's numbers (the commit holding this entry)
 - Helped / failed: the block moved every later line of `planning/README.md` down by 16: the miscite the demo shows
   is now at line 129, not 113, and the 03:32 entry's "planning/README.md line 8" is now line 24. Three docs-review
-  quotes of that file in `planning/reviews/` went "wrong line" (reviewers' notes run: 35 red before, 38 after). The
+  quotes of that file in `planning/reviews/` went "wrong line" (reviewers' notes run: 35 red before, 38 after the block; corrected at 11:42: the demo edit made it 45). The
   `planning/*.md` run stays at 23 red; the unit report also said 43 Lows in card 5, fixed to 44 with the table
 - Corrected by: Danish's instruction; this session's log is not exported or committed
 - Commit: 90f74d2, 79b2ffe, 1c6f593 and the commit holding this entry
 
+## 8 Nov 11:42 The doc fixes' review: the demo's reviewers'-notes count was wrong at its own commit
+- Agent did: measured the reviewers' notes run (38 red) before editing the demo script, then edited it
+- Helped / failed: failed; the review (`planning/reviews/doc-fixes-review-1.md`, F1 High) found the edit itself
+  moved or removed 7 lines the reviews quote, so the run was 45 red at that commit, the same slip as 7 Nov's
+  "19 red, all real". It also found (F2 Medium) that README's "planning before 01:05" missed the planning commits
+  to 01:27; the log starts at 01:33. And three stale lines: STATE's 19 red, README's "each commit carries a
+  `Claude-Session:` id" (the five 8 Nov commits have none), the file list's "in the order they were written"
+- Corrected by: the review; the demo now gives the count measured after its own last edit, README says "before the
+  build began at 01:33", and the three stale lines are fixed
+- Commit: the commits after this entry
+
 ## Lows
+- doc-fixes-review-1 F5, `planning/decisions.md` "8 Nov, before 11:35 (clock not read)": the entry has no clock
+  time, against the format's `date +%H:%M`; the time was not read when it happened, so none is invented
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened
   (patch `open`), a permission-denied file as "file missing"
 - task-2-review-1 F4, `tests/test_check_citations.py:121` and `:95`: tests fix choices 01 leaves open (line:col
