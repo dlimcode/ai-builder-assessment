@@ -98,10 +98,12 @@ more lines and cited at the wrong place come out "not in file").
   the fixes are `fix` commits whose `Fixes:` trailers name the finding (one commit may fix several).
 - **`planning/decisions.md`:** each moment the agent helped, failed or was corrected, written during the sitting;
   three entry times were guessed and then corrected (its own entry says so). Smaller known gaps are its `## Lows`.
-- **Logs:** the session is exported and scrubbed after it ends, so this README is written before that step.
-  `logs/session.txt`, if present, is the session's `/export` scrubbed by `scrub.py` (start-up blocks, this
-  machine's paths, emails, tokens; then a private word list kept outside the repo) and read in full by a person
-  before any push. If it is absent, the export or the scrub could not be made clean. The log cannot show anything
-  after the export: the scrub run itself and the merge.
+- **Logs:** `logs/session.txt` is the build session's `/export`, scrubbed by `scrub.py` (start-up blocks, this
+  machine's paths, emails, tokens; then a private word list kept outside the repo) and read in full by a person.
+  It is not every session: the planning team's work before 01:05 on 7 Nov, the short fix session after the
+  export, and the 8 Nov doc fixes are not in it. Their output is in `planning/` and `git log`.
+- **Time, 7 Nov:** planning about 30 minutes; the build 01:33-02:35; the log, its scrub and the fixes to 03:32.
+  Making the log safe to publish took longer than it should have, about as long as the build. `scrub.py` is a
+  side tool for that job, not part of the checker.
 - **Commit trailers:** each commit carries a `Claude-Session:` id (a session id, nothing private); they stay unless
   stripped before publishing.
