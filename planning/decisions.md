@@ -342,16 +342,23 @@ One entry per real moment the agent helped, failed or was corrected, written as 
 - Agent did: measured the reviewers' notes run (38 red) before editing the demo script, then edited it
 - Helped / failed: failed; the review (`planning/reviews/doc-fixes-review-1.md`, F1 High) found the edit itself
   moved or removed 7 lines the reviews quote, so the run was 45 red at that commit, the same slip as 7 Nov's
-  "19 red, all real". It also found (F2 Medium) that README's "planning before 01:05" missed the planning commits
+  "19 red, all real". It also found (F2 Medium) that README's "the planning team's work before 01:05" missed the planning commits
   to 01:27; the log starts at 01:33. And three stale lines: STATE's 19 red, README's "each commit carries a
   `Claude-Session:` id" (the five 8 Nov commits have none), the file list's "in the order they were written"
 - Corrected by: the review; the demo now gives the count measured after its own last edit, README says "before the
   build began at 01:33", and the three stale lines are fixed
-- Commit: the commits after this entry
+- Commit: the commit holding this entry (ca5e9e2) and the one after it (07f3c31)
+
+## 8 Nov 11:48 The fixes' recheck: all fixed at the head, four Lows
+- Agent did: split the two fixes into two commits after measuring the count with both in place
+- Helped / failed: failed in history only; the recheck (`planning/reviews/doc-fixes-recheck-1.md`) found every
+  finding fixed at 07f3c31 but the demo count wrong at ca5e9e2 (53 red, not 57), the unit report's 44 stale once a
+  45th Low went in, the demo not explaining its "file missing" and "refused" reds, and STATE not naming the fixes
+- Corrected by: the recheck; the count is now stated in the same commit as every edit it depends on, the unit
+  report says 44 at the merge, the demo names those reds, STATE lists the work. No second recheck, per the recipe
+- Commit: the commit holding this entry
 
 ## Lows
-- doc-fixes-review-1 F5, `planning/decisions.md` "8 Nov, before 11:35 (clock not read)": the entry has no clock
-  time, against the format's `date +%H:%M`; the time was not read when it happened, so none is invented
 - task-2-review-1 F3, `tests/test_check_citations.py`: not tested: first three places only, H3's file never opened
   (patch `open`), a permission-denied file as "file missing"
 - task-2-review-1 F4, `tests/test_check_citations.py:121` and `:95`: tests fix choices 01 leaves open (line:col
@@ -420,3 +427,7 @@ One entry per real moment the agent helped, failed or was corrected, written as 
   (safe; shown in the block count)
 - fix-2-recheck-1 F2, `scrub.py:285`: a phrase's end check is ASCII only and stops at a line break, so entry `Alex`
   passes as generic in `/Users/alex-tan/x` or `/Users/alex\nandra` (only entries inside a made-up phrase)
+- doc-fixes-review-1 F5, `planning/decisions.md` "8 Nov, before 11:35 (clock not read)": the entry has no clock
+  time, against the format's `date +%H:%M`; the time was not read when it happened, so none is invented
+- doc-fixes-recheck-1 F1, ca5e9e2 `planning/demo-script.md:36`: the count is wrong at that commit (53 red there,
+  57 from 07f3c31); history only, left rather than rewritten

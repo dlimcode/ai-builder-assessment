@@ -5,7 +5,9 @@ Last confirmed: 2026-11-08
 **Where it stands:** built, scrubbed and merged into `main` (fast-forward) on Danish's yes, 7 Nov. Git records a push
 of `main` (c77f470) to `origin` (`git reflog show origin/main`, read 8 Nov); the remote itself was not checked.
 `logs/session.txt` is committed; the three backup refs and `.review/` are deleted. On 8 Nov, four doc fixes
-(decisions 8 Nov 11:35) are on `build/check-citations`, not yet in `main`.
+(decisions 8 Nov 11:35), their review's fixes (11:42: one High, one Medium) and the recheck's Lows (11:48) are on
+`build/check-citations`, not yet in `main`; the recheck found every finding fixed. Reviews:
+`planning/reviews/doc-fixes-*.md`.
 
 ## Waits on Danish
 - **The 8 Nov doc fixes into `main`:** his yes to the merge.

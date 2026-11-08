@@ -1,7 +1,7 @@
 # Unit report: check-citations (7 Nov 2026)
 
 **Status: superseded.** Merged into `main` on 7 Nov; 63 tests pass. For where it stands now, see
-`planning/STATE.md`. The rest of this file is the report as written before the merge, except the Lows count, fixed to 44 on 8 Nov.
+`planning/STATE.md`. The rest of this file is the report as written before the merge, except the Lows count, fixed on 8 Nov to the 44 there were at the merge; `## Lows` has grown since.
 
 **Outcome:** `check_citations.py`, `scrub.py`, `planning/finish-sitting.sh`, README and demo script are built on
 `build/check-citations`, 62 tests pass, and every Medium-or-worse finding is fixed and checked again. Not merged, not
@@ -14,7 +14,7 @@ pushed; the log export and scrub (task 13) and the merge (task 14) wait on Danis
 | Dog-food | `planning/*.md`: 89 hold, 19 red, all explained (decisions 01:39); reviewers' notes: 26 red, real (task 12) |
 | Reviews | 3 per-commit (tasks 2, 4, 7), 3 unit-end by area, 1 scoped re-review, 5 rechecks: `planning/reviews/` |
 | Findings | Critical 0, High 4, Medium 21, Low 41 (plus questions) |
-| Lows | 44 entries under `## Lows` in `planning/decisions.md`, for the sweep after the merge |
+| Lows | 44 at the merge, under `## Lows` in `planning/decisions.md`, for the sweep after the merge |
 
 ## Medium-or-worse findings and their fixes
 
